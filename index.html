@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Nashat — heat-smart AI exercise coach</title>
+  <meta name="description" content="Nashat uses on-device AI pose detection to count your reps, check your form and keep your workout safe in Bahrain's heat.">
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">AI Symposium 2027 · Sport</span>
+        <h1>Train smart.<br><span>Beat the heat.</span></h1>
+        <p class="lead">Nashat is an AI coach in your browser. It watches your movement through the camera, counts your reps, corrects your form, and plans a workout that is safe for today's Bahrain weather.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary btn-lg" href="coach.html" id="cta-coach">Try the AI coach <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <a class="btn btn-ghost btn-lg" href="heat.html">Check today's heat</a>
+        </div>
+        <p class="small muted" style="margin-top:1rem">No sign-up. No download. Your video never leaves your phone.</p>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <!-- Illustration: a skeleton figure in a squat, like the AI sees it -->
+        <svg viewBox="0 0 400 500">
+          <defs>
+            <radialGradient id="sunG" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="320" cy="90" r="90" fill="url(#sunG)"/>
+          <circle cx="320" cy="90" r="34" fill="#FB923C"/>
+          <g stroke="#2E3A50" stroke-width="1">
+            <path d="M0 420H400M0 380H400M0 340H400M0 300H400"/>
+          </g>
+          <g stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.92">
+            <path d="M180 170 L200 240"/>              <!-- torso -->
+            <path d="M180 170 L235 200 L280 205"/>     <!-- arm -->
+            <path d="M200 240 L265 285 L240 360"/>     <!-- leg -->
+            <path d="M240 360 L270 362"/>
+          </g>
+          <g fill="#F97316">
+            <circle cx="170" cy="140" r="20"/>
+            <circle cx="180" cy="170" r="8"/><circle cx="235" cy="200" r="8"/><circle cx="280" cy="205" r="8"/>
+            <circle cx="200" cy="240" r="8"/><circle cx="240" cy="360" r="8"/>
+          </g>
+          <circle cx="265" cy="285" r="11" fill="#22C55E"/>
+          <path d="M248 270 A26 26 0 0 0 252 306" stroke="#22C55E" stroke-width="3" fill="none"/>
+          <g font-family="Barlow Condensed, sans-serif" font-weight="700">
+            <rect x="282" y="268" rx="10" width="92" height="36" fill="#0F1420" stroke="#22C55E"/>
+            <text x="328" y="293" fill="#86EFAC" font-size="22" text-anchor="middle">KNEE 92°</text>
+            <rect x="30" y="430" rx="12" width="340" height="48" fill="#0F1420" stroke="#22C55E" stroke-width="2"/>
+            <text x="200" y="462" fill="#86EFAC" font-size="24" text-anchor="middle">GOOD DEPTH · REP 7</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="grid grid-3">
+        <div class="card">
+          <span class="badge badge-rule">The problem</span>
+          <h3 style="margin-top:0.75rem">Summer heat in Bahrain</h3>
+          <p class="muted">From June to September it is often too hot and humid to exercise outside safely in the middle of the day. Many people don't know when it is safe and when it is not.</p>
+        </div>
+        <div class="card">
+          <span class="badge badge-rule">The problem</span>
+          <h3 style="margin-top:0.75rem">Training alone at home</h3>
+          <p class="muted">When it is too hot outside, people train indoors with no coach. Bad form, like shallow squats or sagging push-ups, wastes effort and can cause injury.</p>
+        </div>
+        <div class="card">
+          <span class="badge badge-ai">Our AI solution</span>
+          <h3 style="margin-top:0.75rem">A coach in your phone</h3>
+          <p class="muted">Computer vision finds 33 points on your body in every video frame. Nashat turns them into joint angles to count reps and give feedback by voice, live.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <span class="eyebrow">How to use it</span>
+      <h2>Three steps</h2>
+      <div class="grid grid-3 steps">
+        <div class="card step">
+          <h3>Check the heat</h3>
+          <p class="muted">Get Manama's live temperature and humidity. Nashat works out the heat index, finds the coolest time to train today, and sets a safe plan. It also has a fasting mode for Ramadan.</p>
+          <a href="heat.html">Heat check <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="card step">
+          <h3>Train with the AI</h3>
+          <p class="muted">Pick squats, push-ups or jumping jacks. Prop up your phone, step back, and the AI coach counts reps, checks your form and times your rest breaks.</p>
+          <a href="coach.html">AI coach <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="card step">
+          <h3>See how it works</h3>
+          <p class="muted">Watch the AI's view of your body: the 33 landmarks and how sure it is about each one. Then see where it works well and where it fails.</p>
+          <a href="how.html">How it works <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="card" style="display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;justify-content:space-between">
+        <div style="max-width:60ch">
+          <h3>Private by design</h3>
+          <p class="muted" style="margin:0">The AI model runs inside your browser. Camera images are analysed on your device and are never uploaded, saved or shared.</p>
+        </div>
+        <a class="btn btn-ghost" href="team.html">Meet the team</a>
+      </div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { initPage } from './js/ui.js';
+  initPage();
+</script>
+</body>
+</html>

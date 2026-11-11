@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI coach — Nashat</title>
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="modulepreload" href="vendor/mediapipe/vision_bundle.mjs">
+</head>
+<body>
+<main id="main" class="section">
+  <div class="wrap">
+    <span class="eyebrow">Step 2</span>
+    <h1>AI coach</h1>
+
+    <div class="exercise-pick" id="pick" role="group" aria-label="Choose an exercise">
+      <button type="button" data-ex="squat" aria-pressed="true"><strong>Squats</strong><span>Side-on or facing the camera</span></button>
+      <button type="button" data-ex="pushup" aria-pressed="false"><strong>Push-ups</strong><span>Side-on to the camera</span></button>
+      <button type="button" data-ex="jacks" aria-pressed="false"><strong>Jumping jacks</strong><span>Facing the camera</span></button>
+    </div>
+
+    <div class="notice danger hidden" id="heat-warning" style="margin-top:1rem">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <p id="heat-warning-text"></p>
+    </div>
+
+    <div class="coach-layout" style="margin-top:1.25rem">
+      <div>
+        <div class="stage mirror" id="stage">
+          <video id="video" playsinline muted></video>
+          <canvas id="overlay"></canvas>
+          <div class="rep-flash" id="flash"></div>
+          <div class="stage-empty" id="empty">
+            <div>
+              <svg class="icon-lg" style="margin:0 auto 0.75rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <p id="setup-text" style="max-width:34ch;margin:0 auto 1rem"></p>
+              <button class="btn btn-primary btn-lg" id="start-btn" type="button">Start camera</button>
+            </div>
+          </div>
+          <div class="stage-hud">
+            <span class="hud-pill" id="hud-set">Set 1/3</span>
+            <span class="hud-pill" id="hud-time">0:00</span>
+          </div>
+          <div class="cue" id="cue" aria-live="polite"></div>
+          <div class="rest-overlay" id="rest" aria-live="polite">
+            <div>
+              <p class="eyebrow" style="color:var(--info)">Rest. Sip water if you can</p>
+              <div class="num" id="rest-num">60</div>
+              <p class="muted">Next: set <span id="rest-next">2</span></p>
+              <button class="btn btn-ghost btn-sm" id="skip-rest" type="button" style="pointer-events:auto">Skip rest</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:0.75rem">
+          <button class="btn btn-sm btn-ghost hidden" id="stop-btn" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg> Finish
+          </button>
+          <button class="btn btn-sm btn-ghost" id="flip-btn" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17 3l4 4-4 4"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><path d="M7 21l-4-4 4-4"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg> Switch camera
+          </button>
+          <label class="btn btn-sm btn-ghost" for="file-input" style="margin:0">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Use a video file
+          </label>
+          <input type="file" id="file-input" accept="video/*" class="sr-only">
+          <button class="btn btn-sm btn-ghost" id="voice-btn" type="button" aria-pressed="true">Voice: on</button>
+        </div>
+        <p class="hint" id="status" aria-live="polite"></p>
+      </div>
+
+      <aside class="stack">
+        <div class="card">
+          <div class="counter">
+            <div class="tile big"><div class="v" id="c-reps">0</div><div class="k">Reps this set</div></div>
+            <div class="tile"><div class="v" id="c-good">0</div><div class="k">Good form</div></div>
+            <div class="tile"><div class="v" id="c-total">0</div><div class="k">Total reps</div></div>
+          </div>
+          <div class="metrics" id="metrics" style="margin-top:0.75rem"></div>
+        </div>
+
+        <div class="card">
+          <div class="btn-row" style="justify-content:space-between">
+            <h3 style="margin:0">Today's plan</h3>
+            <a class="small" href="heat.html">Change</a>
+          </div>
+          <label class="switch" style="margin-top:0.5rem"><input type="checkbox" id="free-mode"> Free count (no sets, for testing)</label>
+          <p class="muted small" id="plan-text" style="margin:0.5rem 0 0"></p>
+        </div>
+
+        <div class="card hidden" id="summary">
+          <h3>Session summary</h3>
+          <div class="grid grid-2" style="grid-template-columns:1fr 1fr">
+            <div class="stat"><div class="v" id="s-reps">0</div><div class="k">Reps counted</div></div>
+            <div class="stat"><div class="v" id="s-form">0%</div><div class="k">Good form</div></div>
+            <div class="stat"><div class="v" id="s-partial">0</div><div class="k">Half reps (not counted)</div></div>
+            <div class="stat"><div class="v" id="s-time">0:00</div><div class="k">Active time</div></div>
+          </div>
+          <p class="small" id="s-faults" style="margin-top:0.75rem"></p>
+          <div class="btn-row">
+            <button class="btn btn-accent btn-sm" id="log-btn" type="button">Log as a test in the Test Lab</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="section-tight">
+      <div class="notice">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p class="small">The AI runs on this device. Video is analysed frame by frame in your browser and never uploaded or recorded. Stop if you feel pain, dizziness or nausea.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module" src="js/coach.js"></script>
+</body>
+</html>

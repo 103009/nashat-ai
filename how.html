@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>How the AI works — Nashat</title>
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="main" class="section">
+  <div class="wrap">
+    <span class="eyebrow">Step 3</span>
+    <h1>How the AI works</h1>
+    <p class="muted" style="max-width:64ch">Nashat uses <strong>computer vision</strong>, the branch of AI that lets computers understand images. It uses a <strong>pose-estimation</strong> model: a neural network that looks at a photo of a person and predicts where their joints are.</p>
+
+    <h2 style="margin-top:2rem">From data to feedback</h2>
+    <div class="pipeline">
+      <div class="pipe"><span class="n">1 · Data</span><h3>Labelled photos</h3><p class="muted small">Many images of people in different poses. In each one, humans marked where the shoulders, elbows, hips, knees and so on are.</p><span class="badge">Done by Google</span></div>
+      <div class="pipe"><span class="n">2 · Training</span><h3>Learning patterns</h3><p class="muted small">A neural network guessed the joint positions, compared its guesses with the labels, and adjusted millions of numbers to make the error smaller, over and over.</p><span class="badge">Done by Google</span></div>
+      <div class="pipe"><span class="n">3 · Prediction</span><h3>33 body points</h3><p class="muted small">On your phone, the trained model gets each video frame and predicts 33 landmarks (x, y, depth) plus how sure it is that each one is visible.</p><span class="badge badge-ai">AI, live on your device</span></div>
+      <div class="pipe"><span class="n">4 · Our rules</span><h3>Angles → coaching</h3><p class="muted small">Our code turns the points into joint angles (e.g. hip–knee–ankle). A state machine counts a rep when you go down past a target angle and back up, and checks form.</p><span class="badge badge-rule">Written by our team</span></div>
+    </div>
+
+    <h2 style="margin-top:2.5rem">See what the AI sees</h2>
+    <div class="coach-layout">
+      <div>
+        <div class="stage mirror" id="stage">
+          <video id="video" playsinline muted></video>
+          <canvas id="overlay"></canvas>
+          <div class="stage-empty" id="empty">
+            <div>
+              <p style="max-width:32ch;margin:0 auto 1rem">Turn on the camera to see all 33 landmarks and how confident the model is about each one.</p>
+              <button class="btn btn-primary" id="start-btn" type="button">Show AI vision</button>
+            </div>
+          </div>
+          <div class="stage-hud"><span class="hud-pill" id="fps">– fps</span><span class="hud-pill" id="found">No person</span></div>
+        </div>
+        <p class="hint" id="status" aria-live="polite"></p>
+      </div>
+      <div class="card">
+        <h3>Live model output</h3>
+        <p class="muted small">Visibility = how sure the model is that the point is in view (0 to 1). Try covering a knee or turning sideways and watch it drop.</p>
+        <div class="table-wrap" style="max-height:420px">
+          <table>
+            <thead><tr><th>#</th><th>Landmark</th><th class="num">x</th><th class="num">y</th><th class="num">Visibility</th></tr></thead>
+            <tbody id="lm-table"><tr><td colspan="5" class="muted">Waiting for the camera…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:2.5rem">Why AI suits this problem</h2>
+    <div class="grid grid-3">
+      <div class="card"><h3>No special kit</h3><p class="muted">Motion-capture suits and smart sensors are expensive. Almost everyone already has a phone camera.</p></div>
+      <div class="card"><h3>Writing rules for pixels is impossible</h3><p class="muted">Nobody could write "if pixel 3,402 is beige, that's a knee". A neural network learns what joints look like from examples, for different bodies, clothes and lighting.</p></div>
+      <div class="card"><h3>Fast and private</h3><p class="muted">The "lite" model is small enough (about 6 MB) to run many times a second inside a web browser, so video never has to be sent to a server.</p></div>
+    </div>
+
+    <h2 style="margin-top:2.5rem">What it can do, and what it should NOT do</h2>
+    <div class="grid grid-2">
+      <div class="card cando">
+        <h3>The AI can</h3>
+        <ul class="checklist">
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Find one person's body points in real time</li>
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Count reps and spot common form mistakes</li>
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Give instant feedback when no coach is around</li>
+        </ul>
+      </div>
+      <div class="card cannot">
+        <h3>It should NOT</h3>
+        <ul class="checklist">
+          <li><svg class="icon" style="color:var(--danger)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Diagnose injuries or replace a doctor or physiotherapist</li>
+          <li><svg class="icon" style="color:var(--danger)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Decide on its own whether it's safe to train. Your body's warning signs always come first</li>
+          <li><svg class="icon" style="color:var(--danger)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Record, store or upload people's bodies or faces</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="margin-top:2.5rem">Where it gets things wrong</h2>
+    <div class="grid grid-3">
+      <div class="card"><h3>Hidden joints</h3><p class="muted">If a body part is out of frame or blocked, the model has to guess, and angles can jump around.</p></div>
+      <div class="card"><h3>Dim light & baggy clothes</h3><p class="muted">Dark rooms, a thobe or abaya, or clothes the same colour as the background make joints harder to find.</p></div>
+      <div class="card"><h3>Camera angle</h3><p class="muted">A 2D camera sees a flat picture. Push-ups filmed from the front, or a phone tilted down, give wrong angles.</p></div>
+    </div>
+    <p class="muted small" style="margin-top:1rem">Our measured accuracy from real user tests is in the <a href="lab.html">Test Lab</a>.</p>
+  </div>
+</main>
+
+<script type="module">
+  import { initPage, $ } from './js/ui.js';
+  import { loadPoseModel, startCamera, runLoop, drawSkeleton, CAMERA_HELP } from './js/pose.js';
+  initPage();
+
+  const NAMES = ['nose','left eye (inner)','left eye','left eye (outer)','right eye (inner)','right eye','right eye (outer)','left ear','right ear','mouth (left)','mouth (right)','left shoulder','right shoulder','left elbow','right elbow','left wrist','right wrist','left pinky','right pinky','left index','right index','left thumb','right thumb','left hip','right hip','left knee','right knee','left ankle','right ankle','left heel','right heel','left foot index','right foot index'];
+  const video = $('#video'), canvas = $('#overlay');
+  let lastTable = 0;
+
+  $('#start-btn').addEventListener('click', async () => {
+    $('#start-btn').disabled = true;
+    $('#status').textContent = 'Loading the AI model…';
+    try {
+      const [lmk] = await Promise.all([loadPoseModel(), startCamera(video, 'user')]);
+      $('#empty').classList.add('hidden');
+      $('#status').textContent = 'Running on this device. Nothing is uploaded.';
+      runLoop(video, lmk, (lm, { fps, t }) => {
+        drawSkeleton(canvas, video, lm, { showAll: true });
+        $('#fps').textContent = `${fps.toFixed(0)} fps`;
+        $('#found').textContent = lm ? 'Person found' : 'No person';
+        if (lm && t - lastTable > 250) {
+          lastTable = t;
+          $('#lm-table').innerHTML = lm.map((p, i) => {
+            const v = p.visibility ?? 0;
+            return `<tr><td>${i}</td><td>${NAMES[i]}</td><td class="num">${p.x.toFixed(2)}</td><td class="num">${p.y.toFixed(2)}</td><td class="num" style="color:${v > 0.7 ? '#86EFAC' : v > 0.4 ? '#FDE047' : '#FCA5A5'}">${v.toFixed(2)}</td></tr>`;
+          }).join('');
+        }
+      });
+    } catch (e) {
+      $('#status').textContent = CAMERA_HELP[e.name] || e.message;
+      $('#start-btn').disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

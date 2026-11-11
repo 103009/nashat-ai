@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Heat check — Nashat</title>
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="main" class="section">
+  <div class="wrap">
+    <span class="eyebrow">Step 1</span>
+    <h1>Heat check</h1>
+    <p class="muted" style="max-width:62ch">Heat plus humidity is more dangerous than temperature alone, because sweat can't cool you down. Nashat works out the <strong>heat index</strong> ("feels like" temperature) and adjusts your workout to match.</p>
+
+    <div class="split">
+      <form class="card" id="heat-form" novalidate>
+        <div class="btn-row" style="justify-content:space-between;margin-bottom:1rem">
+          <h3 style="margin:0">Conditions</h3>
+          <button type="button" class="btn btn-sm btn-ghost" id="live-btn">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12A9 9 0 0 1 18.5 5.8L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>
+            Live Manama weather
+          </button>
+        </div>
+        <p class="hint" id="live-status" aria-live="polite"></p>
+        <div class="row">
+          <div class="field">
+            <label for="temp">Temperature (°C)</label>
+            <input id="temp" type="number" inputmode="decimal" min="-10" max="60" step="0.1" value="38" required>
+          </div>
+          <div class="field">
+            <label for="rh">Humidity (%)</label>
+            <input id="rh" type="number" inputmode="decimal" min="0" max="100" step="1" value="60" required>
+          </div>
+        </div>
+        <label class="switch"><input type="checkbox" id="sun"> Training outdoors in direct sun</label>
+        <label class="switch"><input type="checkbox" id="fasting"> I am fasting (e.g. Ramadan)</label>
+        <p class="hint" id="form-error" role="alert"></p>
+        <button class="btn btn-primary" type="submit" style="width:100%;margin-top:0.5rem">Make my plan</button>
+      </form>
+
+      <section class="card heat-result" id="result" aria-live="polite">
+        <h3>Your safe plan</h3>
+        <div class="heat-big">
+          <span class="num" id="hi-num">–</span><span class="muted">°C heat index</span>
+        </div>
+        <span class="heat-level" id="hi-level">–</span>
+        <div class="scale" id="scale" aria-hidden="true"></div>
+        <div class="scale-labels" aria-hidden="true"><span>&lt;27</span><span>27–32</span><span>32–41</span><span>41–54</span><span>54+</span></div>
+
+        <div class="plan-tiles">
+          <div class="tile"><div class="v" id="p-sets">–</div><div class="k">Sets</div></div>
+          <div class="tile"><div class="v" id="p-reps">–</div><div class="k">Reps per set</div></div>
+          <div class="tile"><div class="v" id="p-rest">–</div><div class="k">Rest (sec)</div></div>
+          <div class="tile"><div class="v" id="p-max">–</div><div class="k">Max minutes</div></div>
+        </div>
+        <p><strong>Where:</strong> <span id="p-place">–</span><br><strong>Water:</strong> <span id="p-water">–</span></p>
+        <ul class="tips" id="p-tips"></ul>
+        <div class="btn-row" style="margin-top:1rem">
+          <a class="btn btn-accent" href="coach.html">Start training with this plan</a>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:1.25rem" id="forecast-card" hidden>
+      <h3>Next 24 hours in Manama: heat index by hour</h3>
+      <p class="muted small" id="best-text"></p>
+      <div class="hours" id="hours" role="img"></div>
+      <div class="hours-axis" id="hours-axis" aria-hidden="true"></div>
+      <div class="legend" id="legend"></div>
+      <details style="margin-top:0.75rem">
+        <summary>Show as table</summary>
+        <div class="table-wrap" style="margin-top:0.5rem;max-height:320px">
+          <table><thead><tr><th>Time</th><th class="num">Temp °C</th><th class="num">Humidity %</th><th class="num">Heat index °C</th><th>Risk</th></tr></thead><tbody id="hours-table"></tbody></table>
+        </div>
+      </details>
+      <p class="hint">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
+    </section>
+
+    <section class="section-tight">
+      <div class="notice">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p class="small"><strong>This step is not AI.</strong> The heat index comes from the US National Weather Service formula (Rothfusz regression), and the plan comes from safety rules we wrote. The AI part of Nashat is the camera coach. This is general guidance, not medical advice.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+  import { initPage, $, esc } from './js/ui.js';
+  import { makePlan, fetchWeather, bestHour, LEVELS } from './js/heat.js';
+  import { save, load } from './js/store.js';
+  initPage();
+
+  const form = $('#heat-form');
+  const last = load('heatInput', null);
+  if (last) {
+    $('#temp').value = last.tempC; $('#rh').value = last.rh;
+    $('#sun').checked = !!last.inSun; $('#fasting').checked = !!last.fasting;
+  }
+
+  $('#scale').innerHTML = LEVELS.map((l) => `<div style="background:${l.color}"></div>`).join('');
+
+  function render(plan) {
+    $('#hi-num').textContent = plan.heatIndexC.toFixed(0);
+    const lvl = $('#hi-level');
+    lvl.textContent = plan.level.name;
+    lvl.style.background = plan.level.color;
+    $('#result').style.borderColor = plan.level.color;
+    [...$('#scale').children].forEach((d, i) => d.classList.toggle('on', i === plan.level.id));
+    $('#p-sets').textContent = plan.sets;
+    $('#p-reps').textContent = plan.reps;
+    $('#p-rest').textContent = plan.restSec;
+    $('#p-max').textContent = plan.maxMinutes;
+    $('#p-place').textContent = plan.place;
+    $('#p-water').textContent = plan.waterEveryMin ? `a few sips every ${plan.waterEveryMin} minutes` : 'not possible while fasting, so keep the session short and light';
+    $('#p-tips').innerHTML = plan.tips.map((t) => `<li>${esc(t)}</li>`).join('');
+  }
+
+  function readForm() {
+    const tempC = parseFloat($('#temp').value), rh = parseFloat($('#rh').value);
+    if (!Number.isFinite(tempC) || tempC < -10 || tempC > 60) return { error: 'Enter a temperature between -10 and 60 °C.' };
+    if (!Number.isFinite(rh) || rh < 0 || rh > 100) return { error: 'Enter a humidity between 0 and 100 %.' };
+    return { tempC, rh, inSun: $('#sun').checked, fasting: $('#fasting').checked };
+  }
+
+  function update() {
+    const input = readForm();
+    $('#form-error').textContent = input.error || '';
+    if (input.error) return;
+    const plan = makePlan(input);
+    save('heatInput', input);
+    save('plan', plan);
+    render(plan);
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); update(); $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  form.addEventListener('change', update);
+
+  function renderForecast(hours) {
+    const best = bestHour(hours);
+    const max = Math.max(...hours.map((h) => h.hi), 30);
+    const min = Math.min(...hours.map((h) => h.hi), 15);
+    const hh = (t) => t.slice(11, 16);
+    $('#hours').innerHTML = hours.map((h) => {
+      const pct = 12 + 88 * (h.hi - min) / Math.max(1, max - min);
+      const label = `${hh(h.time)}: heat index ${h.hi.toFixed(0)} °C, ${h.level.name}`;
+      return `<div class="bar${h === best ? ' best' : ''}" style="height:${pct}%;background:${h.level.color}" title="${label}"></div>`;
+    }).join('');
+    $('#hours').setAttribute('aria-label', `Bar chart of heat index for the next 24 hours. Coolest time: ${hh(best.time)}.`);
+    $('#hours-axis').innerHTML = hours.map((h, i) => `<span>${i % 3 === 0 ? h.time.slice(11, 13) : ''}</span>`).join('');
+    const used = [...new Set(hours.map((h) => h.level.id))].sort();
+    $('#legend').innerHTML = used.map((id) => `<span><i style="background:${LEVELS[id].color}"></i>${LEVELS[id].name}</span>`).join('') + '<span>Taller bar = hotter. White outline = coolest hour.</span>';
+    $('#hours-table').innerHTML = hours.map((h) => `<tr><td>${h.time.replace('T', ' ')}</td><td class="num">${h.tempC.toFixed(1)}</td><td class="num">${h.rh}</td><td class="num">${h.hi.toFixed(1)}</td><td>${h.level.name}</td></tr>`).join('');
+    $('#best-text').innerHTML = `Best time to train today (05:00–22:00): <strong>${hh(best.time)}</strong>, heat index about <strong>${best.hi.toFixed(0)} °C</strong> (${best.level.name}).`;
+    $('#forecast-card').hidden = false;
+  }
+
+  $('#live-btn').addEventListener('click', async () => {
+    const st = $('#live-status');
+    st.textContent = 'Getting live weather…';
+    try {
+      const { now, hours } = await fetchWeather();
+      $('#temp').value = now.tempC;
+      $('#rh').value = now.rh;
+      st.textContent = `Live weather for Manama at ${now.time.slice(11)}: ${now.tempC} °C, ${now.rh}% humidity.`;
+      update();
+      renderForecast(hours);
+    } catch (e) {
+      st.textContent = 'Could not reach the weather service. Type the temperature and humidity in yourself.';
+    }
+  });
+
+  update();
+</script>
+</body>
+</html>

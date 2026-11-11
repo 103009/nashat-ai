@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Test lab — Nashat</title>
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="main" class="section">
+  <div class="wrap">
+    <span class="eyebrow">Testing with real users</span>
+    <h1>Test lab</h1>
+    <p class="muted" style="max-width:66ch">How to test: a volunteer does a set with the AI coach in <em>Free count</em> mode while a team member counts the reps by hand. Log both numbers here. Nashat then works out how accurate the AI is. Tests are saved only on this device, so use <strong>Export</strong> to keep a copy.</p>
+
+    <section class="grid stats-grid" id="stats" style="margin:1.5rem 0" aria-label="Summary"></section>
+
+    <div class="split">
+      <form class="card" id="test-form" novalidate>
+        <h3 id="new">Log a test</h3>
+        <p class="hint" id="prefill-note"></p>
+        <div class="row">
+          <div class="field">
+            <label for="f-tester">Tester code</label>
+            <input id="f-tester" type="text" maxlength="12" autocomplete="off" required>
+            <p class="hint">A code like T07. No names.</p>
+          </div>
+          <div class="field">
+            <label for="f-ex">Exercise</label>
+            <select id="f-ex"><option value="squat">Squats</option><option value="pushup">Push-ups</option><option value="jacks">Jumping jacks</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="f-ai">Reps counted by AI</label>
+            <input id="f-ai" type="number" inputmode="numeric" min="0" max="500" required>
+          </div>
+          <div class="field">
+            <label for="f-real">Real reps (counted by a person)</label>
+            <input id="f-real" type="number" inputmode="numeric" min="0" max="500" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="f-aigood">Good-form reps (AI)</label>
+            <input id="f-aigood" type="number" inputmode="numeric" min="0" max="500">
+          </div>
+          <div class="field">
+            <label for="f-realgood">Good-form reps (person's judgement)</label>
+            <input id="f-realgood" type="number" inputmode="numeric" min="0" max="500">
+            <p class="hint">Optional</p>
+          </div>
+        </div>
+        <fieldset>
+          <legend>Camera view</legend>
+          <div class="choice-group">
+            <label><input type="radio" name="view" value="front" checked><span>Front</span></label>
+            <label><input type="radio" name="view" value="side"><span>Side</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Lighting</legend>
+          <div class="choice-group">
+            <label><input type="radio" name="light" value="bright" checked><span>Bright</span></label>
+            <label><input type="radio" name="light" value="normal"><span>Normal</span></label>
+            <label><input type="radio" name="light" value="dim"><span>Dim</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Clothing</legend>
+          <div class="choice-group">
+            <label><input type="radio" name="cloth" value="fitted" checked><span>Fitted / sportswear</span></label>
+            <label><input type="radio" name="cloth" value="loose"><span>Loose (e.g. thobe)</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Device</legend>
+          <div class="choice-group">
+            <label><input type="radio" name="device" value="phone" checked><span>Phone</span></label>
+            <label><input type="radio" name="device" value="tablet"><span>Tablet</span></label>
+            <label><input type="radio" name="device" value="laptop"><span>Laptop</span></label>
+          </div>
+        </fieldset>
+
+        <h3 style="margin-top:1.5rem">Tester feedback <span class="muted small">(optional)</span></h3>
+        <div class="row">
+          <div class="field">
+            <label for="f-ease">Easy to use? (1–5)</label>
+            <select id="f-ease"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          </div>
+          <div class="field">
+            <label for="f-useful">Feedback helpful? (1–5)</label>
+            <select id="f-useful"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-again">Would use it again?</label>
+          <select id="f-again"><option value="">–</option><option value="yes">Yes</option><option value="maybe">Maybe</option><option value="no">No</option></select>
+        </div>
+        <div class="field">
+          <label for="f-notes">Comments / what went wrong</label>
+          <textarea id="f-notes" maxlength="500"></textarea>
+        </div>
+        <label class="switch"><input type="checkbox" id="f-consent" required> The tester agreed to take part (no names or photos are saved)</label>
+        <p class="hint" id="form-error" role="alert"></p>
+        <button class="btn btn-primary" type="submit" style="width:100%;margin-top:0.5rem">Save test</button>
+      </form>
+
+      <div class="stack">
+        <section class="card">
+          <h3>Rep-count accuracy by app version</h3>
+          <p class="muted small">Did your changes after testing make the AI better?</p>
+          <div class="chart-bars" id="chart-version"></div>
+        </section>
+        <section class="card">
+          <h3>Accuracy by exercise</h3>
+          <div class="chart-bars" id="chart-ex"></div>
+        </section>
+        <section class="card">
+          <h3>Accuracy by condition</h3>
+          <div class="chart-bars" id="chart-cond"></div>
+        </section>
+      </div>
+    </div>
+
+    <section style="margin-top:2rem">
+      <div class="btn-row" style="justify-content:space-between;margin-bottom:0.75rem">
+        <h2 style="margin:0">All tests</h2>
+        <div class="btn-row">
+          <button class="btn btn-sm btn-ghost" id="export-csv" type="button">Export CSV</button>
+          <button class="btn btn-sm btn-ghost" id="export-json" type="button">Backup (JSON)</button>
+          <label class="btn btn-sm btn-ghost" for="import-json" style="margin:0">Import backup</label>
+          <input type="file" id="import-json" accept="application/json,.json" class="sr-only">
+          <button class="btn btn-sm btn-danger" id="clear" type="button">Delete all</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tester</th><th>Exercise</th><th>Version</th><th class="num">AI reps</th><th class="num">Real reps</th><th class="num">Error</th><th>View</th><th>Light</th><th>Clothing</th><th class="num">Ease</th><th class="num">Helpful</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="tests-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:2rem" id="tune">
+      <h2>Tune the AI rules</h2>
+      <p class="muted">If testing shows a problem, for example squats not counting for shorter people or in loose clothes, adjust a threshold here and test again. Then raise <code>appVersion</code> in <code>js/config.js</code> (e.g. 1.0 → 1.1) so the chart above shows before vs after. Current version: <strong id="cur-version"></strong>.</p>
+      <div class="grid grid-2" id="sliders"></div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn btn-primary btn-sm" id="save-settings" type="button">Save settings</button>
+        <button class="btn btn-ghost btn-sm" id="reset-settings" type="button">Reset to defaults</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module" src="js/lab.js"></script>
+</body>
+</html>

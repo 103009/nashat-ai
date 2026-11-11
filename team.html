@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Team & ethics — Nashat</title>
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="main" class="section">
+  <div class="wrap">
+    <span class="eyebrow" id="team-eyebrow">AI Symposium 2027</span>
+    <h1>The team</h1>
+    <div class="grid grid-3" id="team" style="margin-bottom:2.5rem"></div>
+
+    <div class="split">
+      <section class="card">
+        <h2>Ethics & impact</h2>
+        <div id="ethics"></div>
+      </section>
+      <section class="card">
+        <h2>Privacy in the app</h2>
+        <ul class="checklist">
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>The AI model is part of this website and runs on your device.</li>
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Camera video is never uploaded, recorded or saved.</li>
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No accounts, names or photos. Test results use codes like "T07" and stay in this browser.</li>
+          <li><svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>The only thing sent over the internet is a weather request for Manama's location (not yours).</li>
+        </ul>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:1.25rem">
+      <div class="btn-row" style="align-items:flex-start;gap:2rem">
+        <div class="qr-box" id="qr" aria-label="QR code linking to this website"></div>
+        <div style="flex:1;min-width:240px">
+          <h2>Try it on your phone</h2>
+          <p class="muted">Scan the code to open Nashat. Allow camera access when asked.</p>
+          <p class="small" style="word-break:break-all"><strong id="qr-url"></strong></p>
+          <button class="btn btn-sm btn-ghost" id="qr-dl" type="button">Download QR code (for the brochure)</button>
+          <p class="hint">Before printing, test the QR code with at least two different phones.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:1.25rem">
+      <h2>Credits</h2>
+      <ul class="small" style="padding-left:1.2rem;margin:0">
+        <li><strong>Pose AI model & runtime:</strong> MediaPipe Pose Landmarker (lite) by Google, Apache License 2.0.</li>
+        <li><strong>Weather data:</strong> <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>, CC BY 4.0.</li>
+        <li><strong>Heat index formula:</strong> US National Weather Service (Rothfusz regression).</li>
+        <li><strong>QR code generator:</strong> qrcode-generator by Kazuhiko Arase, MIT License.</li>
+        <li><strong>Fonts:</strong> Barlow & Barlow Condensed by Jeremy Tribby, SIL Open Font License.</li>
+        <li><strong>Icons:</strong> based on Lucide icons, ISC License.</li>
+        <li><strong>AI tools used to build this site:</strong> Claude (Anthropic), used for coding help, as allowed by the symposium rules.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+  import { initPage, $, esc } from './js/ui.js';
+  import { CONFIG } from './js/config.js';
+  import qrcode from './vendor/qrcode.mjs';
+  initPage();
+
+  $('#team-eyebrow').textContent = `${CONFIG.event} · ${CONFIG.field}${CONFIG.teamNumber ? ' · Team ' + CONFIG.teamNumber : ''}`;
+  const initials = (n) => n.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+  $('#team').innerHTML = CONFIG.team.map((m) => `
+    <div class="card member">
+      <div class="avatar" aria-hidden="true">${esc(initials(m.name))}</div>
+      <div><h3 style="margin:0">${esc(m.name)}</h3><p class="muted" style="margin:0">${esc(m.role || 'Role: add in js/config.js')}</p></div>
+    </div>`).join('');
+
+  const statement = CONFIG.ethicsStatement.trim();
+  $('#ethics').innerHTML = statement
+    ? statement.split(/\n\s*\n/).map((p) => `<p>${esc(p.trim())}</p>`).join('')
+    : `<div class="placeholder"><strong>Team: your ethics & impact statement goes here.</strong><br>Write it in your own words (~200 words, covering bias, privacy, safety, jobs and environmental cost, and how you reduce each one) and paste it into <code>ethicsStatement</code> in <code>js/config.js</code>.</div>`;
+
+  const url = CONFIG.siteUrl || new URL('./', location.href).href;
+  $('#qr-url').textContent = url;
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  const n = qr.getModuleCount(), cell = 10, margin = 4;
+  const size = (n + margin * 2) * cell;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000';
+  for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (qr.isDark(r, k)) ctx.fillRect((k + margin) * cell, (r + margin) * cell, cell, cell);
+  $('#qr').append(c);
+  $('#qr-dl').addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = 'nashat-qr.png';
+    a.click();
+  });
+</script>
+</body>
+</html>
