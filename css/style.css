@@ -308,7 +308,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Motion: hide animated elements until GSAP takes over. .js-motion is only added (in each
    page's <head>) when motion is on. Safety net: they appear after 3s if a script fails. */
-.js-motion :is(.intro, [data-split], .page-art),
+.js-motion :is(.intro, [data-split], .page-art, [data-photo-reveal]),
 .js-motion main :is(.card, .pipe, .exercise-pick > button, .stage, .notice, .table-wrap, .member, [data-reveal]) {
   opacity: 0;
   animation: motion-fallback 0.3s 3s forwards;
@@ -394,3 +394,79 @@ html.wipe-enter::after { transform: scaleY(1); transform-origin: 50% 0%; animati
 .pipe-line span { display: block; height: 100%; background: linear-gradient(90deg, #38BDF8, #A855F7, #F97316, #22C55E); transform-origin: 0 50%; }
 .pipe { transition: border-color 0.3s, box-shadow 0.3s; }
 .pipe.is-active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 18px 50px rgba(249, 115, 22, 0.2); }
+
+/* ═══════════ GLASS THEME ═══════════
+   A glowing "aurora" behind everything + frosted-glass surfaces on top
+   (UI UX Pro Max glassmorphism: blur 10–20px, translucent fill, 1px light border). */
+:root {
+  --bg: #0A0F1E;
+  --glass: rgba(20, 27, 45, 0.52);
+  --glass-strong: rgba(13, 18, 32, 0.72);
+  --glass-soft: rgba(255, 255, 255, 0.045);
+  --glass-border: rgba(255, 255, 255, 0.13);
+  --glass-shine: rgba(255, 255, 255, 0.10);
+  --glass-blur: blur(18px) saturate(160%);
+}
+body {
+  background:
+    radial-gradient(60vmax 50vmax at 0% 0%, rgba(249, 115, 22, 0.22), transparent 60%),
+    radial-gradient(55vmax 45vmax at 100% 30%, rgba(225, 29, 72, 0.16), transparent 60%),
+    radial-gradient(60vmax 50vmax at 30% 100%, rgba(124, 58, 237, 0.18), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+.bg-aurora { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.bg-aurora i { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; will-change: transform; }
+.bg-aurora i:nth-child(1) { width: 46vmax; height: 46vmax; left: -12vmax; top: -10vmax; background: radial-gradient(circle, #F97316, transparent 65%); }
+.bg-aurora i:nth-child(2) { width: 40vmax; height: 40vmax; right: -10vmax; top: 18vh; background: radial-gradient(circle, #E11D48, transparent 65%); opacity: 0.38; }
+.bg-aurora i:nth-child(3) { width: 50vmax; height: 50vmax; left: 15vw; bottom: -22vmax; background: radial-gradient(circle, #7C3AED, transparent 65%); opacity: 0.42; }
+.bg-aurora i:nth-child(4) { width: 30vmax; height: 30vmax; right: 18vw; bottom: 8vh; background: radial-gradient(circle, #0EA5E9, transparent 65%); opacity: 0.25; }
+.bg-aurora::after { /* fine grain so the glass reads as glass */
+  content: ''; position: absolute; inset: 0; opacity: 0.06; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* frosted surfaces */
+.card, .pipe, .exercise-pick button, .page-art, .h-panel, .story-step, .notice, .table-wrap, .leader-card,
+.chip, .hud-pill, .glass, .num-tile, .stat {
+  background-color: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-shine), 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+.leader-card { border: 2px solid transparent; background: linear-gradient(rgba(20, 27, 45, 0.62), rgba(20, 27, 45, 0.62)) padding-box, linear-gradient(135deg, #F97316, #E11D48, #A855F7) border-box; }
+/* glass inside glass: no second blur (cheaper and cleaner) */
+.card .tile, .card .stat, .card .metrics div, .page-art { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.card .tile, .card .metrics div { background: var(--glass-soft); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: none; }
+.site-header, .tab-bar { background: rgba(10, 15, 30, 0.55); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border-color: var(--glass-border); }
+input[type='number'], input[type='text'], select, textarea { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.14); }
+th { background: rgba(255, 255, 255, 0.06); }
+.btn-ghost { background: rgba(255, 255, 255, 0.04); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-color: rgba(255, 255, 255, 0.18); }
+.choice-group span { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.14); }
+.site-footer { border-color: var(--glass-border); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card, .pipe, .exercise-pick button, .page-art, .h-panel, .story-step, .notice, .table-wrap, .chip, .hud-pill, .glass, .num-tile, .stat,
+  .site-header, .tab-bar { background-color: var(--glass-strong); }
+}
+
+/* ═══════════ PHOTOS ═══════════ */
+main.has-banner { position: relative; }
+.page-banner {
+  position: absolute; left: 0; right: 0; top: 0; height: min(560px, 78vh); z-index: -1; overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 100%); mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+}
+.page-banner img { width: 100%; height: 115%; object-fit: cover; object-position: center 35%; opacity: 0.55; will-change: transform; }
+.page-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.35) 70%, rgba(10, 15, 30, 0.2) 100%); }
+.has-banner .page-head-text, .has-banner > .wrap > .eyebrow, .has-banner > .wrap > h1 { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6); }
+
+.photo-frame { position: relative; overflow: hidden; border-radius: 22px; border: 1px solid var(--glass-border); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4); background: #111827; isolation: isolate; }
+.photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; transition: scale 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+figure { margin: 0; }
+.glass-cap {
+  display: grid; gap: 0.15rem; padding: 0.75rem 1rem; border-radius: 14px;
+  background: rgba(13, 18, 32, 0.55); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 var(--glass-shine);
+}
+.glass-cap strong { font: 700 1.35rem/1.1 var(--font-head); text-transform: uppercase; letter-spacing: 0.02em; }
+.glass-cap span { color: var(--muted); font-size: 0.95rem; }

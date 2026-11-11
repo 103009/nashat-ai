@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=5">
-  <link rel="stylesheet" href="css/home.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/home.css?v=6">
   <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
 </head>
 <body class="home">
@@ -17,6 +17,9 @@
 
   <!-- ───────── HERO ───────── -->
   <section class="hero hero-v2" id="hero">
+    <div class="hero-photo" aria-hidden="true">
+      <img src="assets/photos/run.webp" srcset="assets/photos/run-sm.webp 800w, assets/photos/run.webp 1600w" sizes="100vw" alt="" fetchpriority="high">
+    </div>
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <span class="eyebrow intro">AI Symposium 2027 · Sport</span>
@@ -61,25 +64,6 @@
       </div>
     </div>
 
-    <!-- Original illustration: Manama skyline (World Trade Center sails, Financial Harbour towers, palms) -->
-    <svg class="skyline" viewBox="0 0 1440 240" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <g class="sky-far" fill="#1B2538">
-        <path d="M0 240V180h40v-30h30v50h26v-70h34v70h30v-40h40v60h28v-90h36v90h30v-50h44v50h38v-30h40v40h30v-80h36v80h40v-60h34v60h36v-40h30v-50h40v90h36v-60h42v60h30v-100h38v100h36v-40h40v40h34v-70h32v70h40v-30h46v50h30v-80h40v80h36v-40h40v60h30v-50h40v70h34V240z"/>
-      </g>
-      <g class="sky-near" fill="#111827">
-        <path d="M120 240c4-40 6-70 4-96M124 144c-18-6-34-2-46 10M124 144c16-10 34-10 48 0M124 144c-6-14-18-24-34-26M124 144c8-14 22-22 38-20M124 144c-14 0-26 10-30 24M124 144c12 2 24 12 26 26" stroke="#111827" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <path d="M1320 240c-3-34-4-58-2-82M1318 158c-16-6-30-2-40 8M1318 158c14-9 30-9 42 0M1318 158c-5-12-16-21-30-23M1318 158c7-12 19-19 33-17" stroke="#111827" stroke-width="5" fill="none" stroke-linecap="round"/>
-        <rect x="240" y="150" width="46" height="90"/><rect x="296" y="120" width="38" height="120"/><rect x="344" y="168" width="54" height="72"/>
-        <path d="M560 240 Q572 120 610 30 L624 30 Q616 140 632 240Z"/>
-        <path d="M724 240 Q712 120 674 30 L660 30 Q668 140 652 240Z"/>
-        <rect x="620" y="86" width="44" height="6"/><rect x="616" y="132" width="52" height="6"/><rect x="612" y="178" width="60" height="6"/>
-        <g fill="none" stroke="#111827" stroke-width="4"><circle cx="642" cy="74" r="10"/><circle cx="642" cy="120" r="11"/><circle cx="642" cy="166" r="12"/></g>
-        <path d="M860 240V70l40-20v190z"/><path d="M916 240V50l44-22v212z"/>
-        <rect x="980" y="140" width="50" height="100"/><rect x="1040" y="110" width="34" height="130"/><rect x="1084" y="160" width="60" height="80"/>
-        <rect x="1160" y="130" width="40" height="110"/><rect x="420" y="190" width="90" height="50"/><rect x="760" y="176" width="70" height="64"/>
-        <rect x="0" y="228" width="1440" height="12"/>
-      </g>
-    </svg>
   </section>
 
   <!-- ───────── MARQUEE ───────── -->
@@ -131,6 +115,30 @@
           <span class="heat-level" id="gauge-level">Extreme danger</span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ───────── WHAT THE AI SEES (real model output on photos) ───────── -->
+  <section class="section ai-sees" id="ai-sees">
+    <div class="wrap">
+      <span class="eyebrow">Real AI output</span>
+      <h2>This is what our AI sees</h2>
+      <p class="muted sees-lead">We ran Nashat's pose model on these photos. The skeleton, points and angles you see are its real output, not drawn by hand.</p>
+      <div class="sees-grid">
+        <figure class="pose-photo" data-pose="squat">
+          <div class="photo-frame" data-photo-reveal>
+            <div class="photo-inner"><img src="assets/photos/squat-sm.webp" srcset="assets/photos/squat-sm.webp 800w, assets/photos/squat.webp 1536w" sizes="(max-width: 860px) 100vw, 45vw" alt="An athlete doing a deep squat in a gym" width="1536" height="2048" loading="lazy"><svg class="pose-svg" aria-hidden="true"></svg></div>
+          </div>
+          <figcaption class="glass-cap"><strong>Squat</strong><span class="pose-read">AI found 33 of 33 body points</span></figcaption>
+        </figure>
+        <figure class="pose-photo" data-pose="pushup">
+          <div class="photo-frame" data-photo-reveal>
+            <div class="photo-inner"><img src="assets/photos/pushup-sm.webp" srcset="assets/photos/pushup-sm.webp 800w, assets/photos/pushup.webp 1600w" sizes="(max-width: 860px) 100vw, 45vw" alt="A young man doing a push-up at home with his phone filming him" width="1600" height="1200" loading="lazy"><svg class="pose-svg" aria-hidden="true"></svg></div>
+          </div>
+          <figcaption class="glass-cap"><strong>Push-up</strong><span class="pose-read">AI found 31 of 33 body points</span></figcaption>
+        </figure>
+      </div>
+      <p class="hint" style="margin-top:1rem">Photos: AI-generated for this project. Skeletons: real output of Nashat's on-device pose model.</p>
     </div>
   </section>
 
@@ -219,6 +227,32 @@
     </div>
   </section>
 
+  <!-- ───────── SPORTS GALLERY ───────── -->
+  <section class="section sports" id="sports">
+    <div class="wrap">
+      <span class="eyebrow">Every sport, every season</span>
+      <h2>Stay active through Bahrain's summer</h2>
+      <div class="bento">
+        <figure class="sport-card s-football">
+          <div class="photo-frame" data-photo-reveal><img src="assets/photos/football-sm.webp" srcset="assets/photos/football-sm.webp 800w, assets/photos/football.webp 1600w" sizes="(max-width: 860px) 100vw, 50vw" alt="Youth football match at night under floodlights" loading="lazy"></div>
+          <figcaption class="glass-cap"><strong>Football</strong><span>Play after sunset under the floodlights, when it's cooler.</span></figcaption>
+        </figure>
+        <figure class="sport-card s-basketball">
+          <div class="photo-frame" data-photo-reveal><img src="assets/photos/basketball-sm.webp" srcset="assets/photos/basketball-sm.webp 800w, assets/photos/basketball.webp 1536w" sizes="(max-width: 860px) 100vw, 25vw" alt="Basketball player jumping for a layup in an indoor hall" loading="lazy"></div>
+          <figcaption class="glass-cap"><strong>Basketball</strong><span>Air-conditioned halls are safe at any hour.</span></figcaption>
+        </figure>
+        <figure class="sport-card s-padel">
+          <div class="photo-frame" data-photo-reveal><img src="assets/photos/padel-sm.webp" srcset="assets/photos/padel-sm.webp 800w, assets/photos/padel.webp 1600w" sizes="(max-width: 860px) 100vw, 25vw" alt="Two players in an evening padel match" loading="lazy"></div>
+          <figcaption class="glass-cap"><strong>Padel</strong><span>Book evening slots and drink between games.</span></figcaption>
+        </figure>
+        <figure class="sport-card s-run">
+          <div class="photo-frame" data-photo-reveal><img src="assets/photos/run-sm.webp" srcset="assets/photos/run-sm.webp 800w, assets/photos/run.webp 1600w" sizes="(max-width: 860px) 100vw, 25vw" alt="Runner on the seafront at sunrise" loading="lazy"></div>
+          <figcaption class="glass-cap"><strong>Running</strong><span>Go at sunrise, before the heat index climbs.</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
   <!-- ───────── SCREENS ───────── -->
   <section class="section screens" id="screens">
     <div class="wrap">
@@ -268,6 +302,6 @@
     </div>
   </section>
 </main>
-<script type="module" src="js/home.js?v=5"></script>
+<script type="module" src="js/home.js?v=6"></script>
 </body>
 </html>

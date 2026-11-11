@@ -119,3 +119,67 @@ body.home .site-footer { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) {
   .phone { transition: none; }
 }
+
+/* ═══════════ GLASS + PHOTOS (home) ═══════════ */
+.h-panel, .story-step { background-color: var(--glass); }
+.marquee { background: rgba(255, 255, 255, 0.03); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-color: var(--glass-border); }
+.heat-story { background: radial-gradient(ellipse at 80% 50%, rgba(239, 68, 68, 0.16), transparent 60%); }
+.how-h { background: rgba(255, 255, 255, 0.02); border-color: var(--glass-border); }
+.h-art { background: radial-gradient(circle at 70% 20%, rgba(249, 115, 22, 0.2), transparent 60%), rgba(10, 15, 30, 0.55); }
+.num-tile { border-radius: 18px; border-top: 3px solid var(--primary); padding: 1.1rem 1.1rem 1rem; }
+.hero-visual { background: linear-gradient(160deg, rgba(38, 50, 74, 0.55), rgba(20, 27, 41, 0.55)); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border-color: var(--glass-border); }
+
+/* hero photo */
+.hero-v2 { min-height: min(100vh, 900px); display: flex; flex-direction: column; justify-content: center; padding-bottom: 3rem; }
+.hero-v2 .hero-grid { z-index: 1; }
+.hero-photo { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.hero-photo img { width: 100%; height: 120%; object-fit: cover; object-position: 60% 40%; will-change: transform; }
+.hero-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(10, 15, 30, 0.92) 0%, rgba(10, 15, 30, 0.7) 40%, rgba(10, 15, 30, 0.25) 75%, rgba(10, 15, 30, 0.45) 100%),
+    linear-gradient(180deg, rgba(10, 15, 30, 0) 55%, var(--bg) 100%);
+}
+.hero-v2::before { z-index: 0; opacity: 0.6; }
+.hero-copy .lead { color: #D5DEEB; }
+@media (max-width: 860px) {
+  .hero-photo::after { background: linear-gradient(180deg, rgba(10, 15, 30, 0.62) 0%, rgba(10, 15, 30, 0.7) 45%, rgba(10, 15, 30, 0.88) 78%, var(--bg) 100%); }
+  .hero-photo img { object-position: 64% 40%; }
+}
+
+/* what the AI sees */
+.sees-lead { max-width: 62ch; font-size: 1.1rem; }
+.sees-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 1.5rem; align-items: center; margin-top: 2rem; }
+.pose-photo { position: relative; }
+.pose-photo[data-pose='squat'] .photo-frame { aspect-ratio: 3 / 4; }
+.pose-photo[data-pose='pushup'] .photo-frame { aspect-ratio: 4 / 3; }
+.pose-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.pose-svg .bone { stroke: #F8FAFC; stroke-width: 7; stroke-linecap: round; fill: none; opacity: 0.95; filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.6)); }
+.pose-svg .joint { fill: #F97316; stroke: #0A0F1E; stroke-width: 3; }
+.pose-svg .joint.key { fill: #22C55E; }
+.pose-svg .arc { stroke: #22C55E; stroke-width: 6; fill: none; stroke-linecap: round; }
+.pose-photo .glass-cap { position: absolute; left: 1rem; bottom: 1rem; z-index: 3; max-width: calc(100% - 2rem); }
+.pose-read { color: #BBF7D0 !important; font-weight: 600; }
+@media (max-width: 860px) { .sees-grid { grid-template-columns: 1fr; } .pose-photo[data-pose='squat'] .photo-frame { aspect-ratio: 4 / 5; } }
+
+/* sports bento */
+.bento { display: grid; gap: 1rem; margin-top: 2rem; grid-template-columns: 1.6fr 1fr 1fr; grid-template-rows: 280px 280px; }
+.sport-card { position: relative; min-height: 0; }
+.sport-card .photo-frame { height: 100%; }
+.s-football { grid-row: span 2; }
+.s-basketball { grid-row: span 2; }
+.sport-card .glass-cap { position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.9rem; z-index: 2; }
+.sport-card:hover .photo-frame img, .pose-photo:hover .photo-inner { scale: 1.06; } /* 'scale' adds to GSAP's transform */
+.photo-inner { position: relative; width: 100%; height: 100%; transition: scale 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.photo-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 860px) {
+  .bento { grid-template-columns: 1fr 1fr; grid-template-rows: none; grid-auto-rows: 240px; }
+  .s-football { grid-column: span 2; grid-row: span 1; }
+  .s-basketball { grid-row: span 2; }
+}
+@media (max-width: 520px) {
+  .bento { grid-template-columns: 1fr; grid-auto-rows: 260px; }
+  .s-football, .s-basketball { grid-column: auto; grid-row: auto; }
+  .s-basketball { grid-row: span 1; }
+  .sport-card .glass-cap span { font-size: 0.88rem; }
+}

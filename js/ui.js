@@ -65,6 +65,11 @@ export function initPage() {
       </button>
     </div>`;
   document.body.prepend(header);
+  const aurora = document.createElement('div');
+  aurora.className = 'bg-aurora';
+  aurora.setAttribute('aria-hidden', 'true');
+  aurora.innerHTML = '<i></i><i></i><i></i><i></i>';
+  document.body.prepend(aurora);
   header.querySelector('.motion-toggle').addEventListener('click', () => {
     setMotionPref(motionOn() ? 'off' : 'on');
     location.reload();

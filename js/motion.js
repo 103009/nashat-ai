@@ -153,6 +153,36 @@ function hoverEffects(gsap) {
   }
 }
 
+/** Re-measure every ScrollTrigger in page order (pins change the layout below them). */
+export function settle() {
+  const ST = window.ScrollTrigger;
+  if (!ST) return;
+  ST.sort();
+  ST.refresh();
+}
+
+/**
+ * Photos: a curtain-style clip reveal with the image zooming out, then a gentle
+ * parallax while the photo is on screen. Pages with pinned sections call this
+ * after creating their pins (so triggers stay in page order).
+ */
+export function photoReveals(gsap, root = document) {
+  for (const frame of root.querySelectorAll('[data-photo-reveal]')) {
+    if (frame.__revealed) continue;
+    frame.__revealed = true;
+    const img = frame.querySelector('.photo-inner') || frame.querySelector('img'); // photo (+ overlay) moves as one
+    gsap.set(frame, { autoAlpha: 1, clipPath: 'inset(100% 0% 0% 0% round 22px)' });
+    gsap.set(img, { scale: 1.35, transformOrigin: '50% 50%' });
+    gsap.timeline({ scrollTrigger: { trigger: frame, start: 'top 90%', once: true } })
+      .to(frame, { clipPath: 'inset(0% 0% 0% 0% round 22px)', duration: 1.3, ease: 'expo.inOut' })
+      .to(img, { scale: 1.12, duration: 1.8, ease: 'expo.out' }, 0);
+    gsap.fromTo(img, { yPercent: -5 }, {
+      yPercent: 5, ease: 'none',
+      scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: true },
+    });
+  }
+}
+
 // Things that slide in as you scroll (each page can add data-reveal to more)
 const REVEAL = 'main :is(.card, .pipe, .exercise-pick > button, .stage, .notice, .table-wrap, .member, [data-reveal])';
 
@@ -211,6 +241,22 @@ export async function autoAnimate() {
     });
   }
 
+  // ── glowing background drifts as you scroll (scroll-linked, not looping) ──
+  const blobs = document.querySelectorAll('.bg-aurora i');
+  const drift = [[12, 30], [-18, 22], [10, -26], [-14, -18]];
+  blobs.forEach((b, i) => gsap.to(b, {
+    xPercent: drift[i][0], yPercent: drift[i][1], scale: 1.15, ease: 'none',
+    scrollTrigger: { start: 0, end: 'max', scrub: 1.5 },
+  }));
+
+  // ── page banner photo: slow zoom in on arrival, parallax on scroll ──
+  const banner = document.querySelector('.page-banner img');
+  if (banner) {
+    gsap.fromTo(banner, { scale: 1.2, autoAlpha: 0 }, { scale: 1, autoAlpha: 0.55, duration: 2.2, ease: 'power2.out' });
+    gsap.to(banner, { yPercent: 18, ease: 'none', scrollTrigger: { trigger: '.page-banner', start: 'top top', end: 'bottom top', scrub: true } });
+  }
+  if (!document.body.classList.contains('home')) photoReveals(gsap);
+
   // ── illustrations drift with scroll ──
   for (const art of arts) {
     gsap.to(art.querySelector('svg'), { yPercent: 16, ease: 'none', scrollTrigger: { trigger: art, start: 'top 80px', end: 'bottom top', scrub: true } });
@@ -232,8 +278,10 @@ export async function autoAnimate() {
   autoHideHeader(gsap);
   hoverEffects(gsap);
 
-  window.addEventListener('load', () => ScrollTrigger.refresh());
-  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  requestAnimationFrame(settle);
+  window.addEventListener('load', settle);
+  document.fonts?.ready.then(settle);
+  setTimeout(settle, 1200);
 }
 
 /** Count a number up to its new value (e.g. heat index, stat tiles). */

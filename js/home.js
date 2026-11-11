@@ -5,8 +5,10 @@
 // for desktop/mobile + reduced motion, and ScrollTrigger.refresh() after images/fonts.
 
 import { initPage } from './ui.js';
-import { ready } from './motion.js';
+import { ready, photoReveals, settle } from './motion.js';
 import { heatIndexC, levelFor } from './heat.js';
+import { PHOTO_POSES } from './photo-poses.js';
+import { angleAt } from './exercises.js';
 
 initPage();
 
@@ -82,6 +84,50 @@ function cue(text, color) {
 }
 pose(92);
 
+// ── "What the AI sees": draw the model's real skeleton over the photos ──
+const BONES = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28], [27, 31], [28, 32]];
+const KEY = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+function buildPose(fig) {
+  const pose = PHOTO_POSES[fig.dataset.pose];
+  const svg = fig.querySelector('.pose-svg');
+  if (!pose || !svg) return null;
+  const { w, h, pts } = pose;
+  const P = (i) => ({ x: pts[i][0] * w, y: pts[i][1] * h, v: pts[i][2] });
+  const ok = (i) => pts[i][2] > 0.5;
+  const sw = w / 110, r = w / 95;
+  // the body side the camera sees best
+  const side = (l, rr) => (l.reduce((a, i) => a + pts[i][2], 0) >= rr.reduce((a, i) => a + pts[i][2], 0) ? l : rr);
+  let angle, label, arcPts;
+  if (fig.dataset.pose === 'squat') {
+    const [hip, knee, ankle] = side([23, 25, 27], [24, 26, 28]);
+    angle = angleAt(P(hip), P(knee), P(ankle));
+    label = (a) => `Knee ${Math.round(a)}° · ${a <= 100 ? 'full depth ✓' : 'go lower'}`;
+    arcPts = [hip, knee, ankle];
+  } else {
+    const [sh, hip, ank] = side([11, 23, 27], [12, 24, 28]);
+    angle = angleAt(P(sh), P(hip), P(ank));
+    label = (a) => `Body line ${Math.round(a)}° · ${a >= 155 ? 'straight ✓' : 'hips out of line'}`;
+    arcPts = [sh, hip, ank];
+  }
+  // arc at the measured joint
+  const [a, b, c] = arcPts.map(P);
+  const rad = w / 16;
+  const u = (p) => { const d = Math.hypot(p.x - b.x, p.y - b.y) || 1; return { x: b.x + ((p.x - b.x) / d) * rad, y: b.y + ((p.y - b.y) / d) * rad }; };
+  const p1 = u(a), p2 = u(c);
+  const sweep = ((a.x - b.x) * (c.y - b.y) - (a.y - b.y) * (c.x - b.x)) > 0 ? 1 : 0;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  svg.innerHTML =
+    BONES.filter(([i, j]) => ok(i) && ok(j)).map(([i, j]) => `<line class="bone" x1="${P(i).x.toFixed(1)}" y1="${P(i).y.toFixed(1)}" x2="${P(j).x.toFixed(1)}" y2="${P(j).y.toFixed(1)}" style="stroke-width:${sw}"/>`).join('') +
+    `<path class="arc" d="M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A${rad} ${rad} 0 0 ${sweep} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}" style="stroke-width:${sw * 0.8}"/>` +
+    KEY.filter(ok).map((i) => `<circle class="joint${i === arcPts[1] ? ' key' : ''}" cx="${P(i).x.toFixed(1)}" cy="${P(i).y.toFixed(1)}" r="${i === arcPts[1] ? r * 1.5 : r}" style="stroke-width:${sw * 0.45}"/>`).join('');
+  const read = fig.querySelector('.pose-read');
+  const found = pts.filter((q) => q[2] > 0.5).length;
+  read.textContent = `${label(angle)} · ${found}/33 points`;
+  return { svg, angle, label, read, found };
+}
+const poses = $$('.pose-photo').map((fig) => ({ fig, data: buildPose(fig) })).filter((x) => x.data);
+
 // ── Animations ──
 ready().then((gsap) => {
   if (!gsap) return; // reduced motion or GSAP unavailable: the static page is complete
@@ -107,10 +153,12 @@ ready().then((gsap) => {
   mm.add({ desktop: '(min-width: 861px)', mobile: '(max-width: 860px)' }, (ctx) => {
     const { desktop } = ctx.conditions;
 
-    // 1 · HERO parallax: chips drift, skyline layers move at different speeds, the sun sinks
+    // 1 · HERO: the photo slowly zooms in on arrival, then drifts with scroll; chips float at different speeds
     const heroST = { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true };
+    gsap.fromTo('.hero-photo img', { scale: 1.18 }, { scale: 1, duration: 2.6, ease: 'power2.out' });
+    gsap.to('.hero-photo img', { yPercent: 14, ease: 'none', scrollTrigger: heroST });
+    gsap.to('.hero-stage', { yPercent: -8, ease: 'none', scrollTrigger: heroST });
     $$('.chip').forEach((c) => gsap.to(c, { y: Number(c.dataset.speed), ease: 'none', scrollTrigger: heroST }));
-    gsap.to('.sky-far', { yPercent: 14, ease: 'none', scrollTrigger: heroST });
     gsap.to('#hero-sun', { y: 70, ease: 'none', scrollTrigger: heroST });
     gsap.fromTo('.chip', { autoAlpha: 0, scale: 0.8 }, { autoAlpha: 1, scale: 1, duration: 0.5, stagger: 0.15, delay: 0.6, ease: 'back.out(2)' });
 
@@ -147,6 +195,26 @@ ready().then((gsap) => {
         .addLabel('s' + i);
     }
     story3.to({}, { duration: 0.4 });
+
+    // 3b · WHAT THE AI SEES: photo reveals, then the skeleton draws itself and the angle counts
+    photoReveals(gsap, $('#ai-sees'));
+    for (const { fig, data } of poses) {
+      const bones = data.svg.querySelectorAll('.bone');
+      const joints = data.svg.querySelectorAll('.joint');
+      const arc = data.svg.querySelector('.arc');
+      const n = { v: 180 };
+      gsap.set(bones, { drawSVG: '0%' });
+      gsap.set(joints, { scale: 0, transformOrigin: '50% 50%' });
+      gsap.set(arc, { drawSVG: '0%' });
+      gsap.timeline({ delay: 0.5, scrollTrigger: { trigger: fig, start: 'top 75%', toggleActions: 'play none none reverse' } })
+        .to(bones, { drawSVG: '100%', duration: 0.5, stagger: 0.05, ease: 'power2.out' })
+        .to(joints, { scale: 1, duration: 0.35, stagger: 0.03, ease: 'back.out(3)' }, '-=0.3')
+        .to(arc, { drawSVG: '100%', duration: 0.6 }, '-=0.1')
+        .fromTo(n, { v: fig.dataset.pose === 'squat' ? 175 : 120 }, {
+          v: data.angle, duration: 1, ease: 'power2.out',
+          onUpdate: () => { data.read.textContent = `${data.label(n.v)} · ${data.found}/33 points`; },
+        }, '<');
+    }
 
     // 4 · HOW IT WORKS: horizontal scroll on desktop, normal stacked scroll on mobile
     const how = $('#how-h');
@@ -190,6 +258,13 @@ ready().then((gsap) => {
       .fromTo($('.bubble', voice), { scale: 0.5, autoAlpha: 0, transformOrigin: '20% 100%' }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'back.out(2.5)' }, 0.5)
       .fromTo($$('.waves path', voice), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25, stagger: 0.12 }, 0.7);
 
+    // 4b · SPORTS GALLERY: curtain reveals + parallax photos, captions slide up
+    photoReveals(gsap, $('#sports'));
+    gsap.from('.sport-card .glass-cap', {
+      autoAlpha: 0, y: 30, duration: 0.8, stagger: 0.12, ease: 'expo.out',
+      scrollTrigger: { trigger: '.bento', start: 'top 75%', once: true },
+    });
+
     // 5 · PHONES: pop in, then float at different speeds (parallax) on desktop
     ScrollTrigger.batch('.phone', {
       start: 'top 85%', once: true,
@@ -228,6 +303,8 @@ ready().then((gsap) => {
   });
 
   // Images and fonts change the layout, so recalculate trigger positions afterwards
-  window.addEventListener('load', () => ScrollTrigger.refresh());
-  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  // pins change the layout below them: re-measure everything in page order
+  settle();
+  window.addEventListener('load', settle);
+  document.fonts?.ready.then(settle);
 });

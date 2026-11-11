@@ -68,6 +68,8 @@ js/motion.js     animations (GSAP): page intro, scroll reveals, illustrations, c
 js/home.js       home page scroll story: pinned heat gauge, horizontal steps, parallax
 css/home.css     home page layout · css/fonts.css: self-hosted Barlow fonts
 assets/shots/    screenshots of the app used on the home page
+assets/photos/   AI-generated sports photos (Higgsfield, Z Image), WebP, 800w + full size
+js/photo-poses.js real pose-model output on those photos (drawn as skeletons on the home page)
 vendor/          MediaPipe runtime (Apache 2.0), GSAP (GreenSock standard licence), Lenis (MIT), QR generator (MIT)
 models/          pose_landmarker_lite.task: the trained AI model (about 6 MB)
 ```
