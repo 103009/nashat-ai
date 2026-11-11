@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.add('js-motion')</script>
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
   <link rel="modulepreload" href="vendor/mediapipe/vision_bundle.mjs">
 </head>
 <body>
@@ -104,6 +104,19 @@
             <button class="btn btn-accent btn-sm" id="log-btn" type="button">Log as a test in the Test Lab</button>
           </div>
         </div>
+        <details class="card" id="trouble">
+          <summary><strong>Troubleshoot</strong> <span class="muted small">camera or AI not starting?</span></summary>
+          <div class="field" style="margin-top:1rem">
+            <label for="engine">AI engine</label>
+            <select id="engine">
+              <option value="auto">Auto: graphics card, falls back to CPU</option>
+              <option value="GPU">Graphics card (GPU) only</option>
+              <option value="CPU">CPU: slower, works on almost any computer</option>
+            </select>
+          </div>
+          <button class="btn btn-sm btn-ghost" id="check-btn" type="button">Run system check</button>
+          <ul class="checks" id="checks" aria-live="polite"></ul>
+        </details>
       </aside>
     </div>
 
@@ -116,6 +129,6 @@
   </div>
 </main>
 
-<script type="module" src="js/coach.js"></script>
+<script type="module" src="js/coach.js?v=5"></script>
 </body>
 </html>

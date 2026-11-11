@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.add('js-motion')</script>
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
 </head>
 <body>
 <main id="main" class="section">
@@ -112,7 +112,7 @@
   import { initPage, $, esc } from './js/ui.js';
   import { makePlan, fetchWeather, bestHour, LEVELS } from './js/heat.js';
   import { save, load } from './js/store.js';
-  import { countUp, growBars, nudge } from './js/motion.js';
+  import { countUp, growBars, nudge, scrollToEl } from './js/motion.js';
   initPage();
 
   const form = $('#heat-form');
@@ -158,7 +158,7 @@
     render(plan);
   }
 
-  form.addEventListener('submit', (e) => { e.preventDefault(); update(); $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  form.addEventListener('submit', (e) => { e.preventDefault(); update(); scrollToEl($('#result')); });
   form.addEventListener('change', update);
 
   function renderForecast(hours) {

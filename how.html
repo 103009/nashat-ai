@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.add('js-motion')</script>
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
 </head>
 <body>
 <main id="main" class="section">
@@ -35,13 +35,16 @@
 </svg></div>
     </div>
 
+    <section class="pipe-section no-reveal" id="pipe-section">
     <h2 style="margin-top:2rem">From data to feedback</h2>
+    <div class="pipe-line" aria-hidden="true"><span></span></div>
     <div class="pipeline">
       <div class="pipe"><span class="n">1 · Data</span><h3>Labelled photos</h3><p class="muted small">Many images of people in different poses. In each one, humans marked where the shoulders, elbows, hips, knees and so on are.</p><span class="badge">Done by Google</span></div>
       <div class="pipe"><span class="n">2 · Training</span><h3>Learning patterns</h3><p class="muted small">A neural network guessed the joint positions, compared its guesses with the labels, and adjusted millions of numbers to make the error smaller, over and over.</p><span class="badge">Done by Google</span></div>
       <div class="pipe"><span class="n">3 · Prediction</span><h3>33 body points</h3><p class="muted small">On your phone, the trained model gets each video frame and predicts 33 landmarks (x, y, depth) plus how sure it is that each one is visible.</p><span class="badge badge-ai">AI, live on your device</span></div>
       <div class="pipe"><span class="n">4 · Our rules</span><h3>Angles → coaching</h3><p class="muted small">Our code turns the points into joint angles (e.g. hip–knee–ankle). A state machine counts a rep when you go down past a target angle and back up, and checks form.</p><span class="badge badge-rule">Written by our team</span></div>
     </div>
+    </section>
 
     <h2 style="margin-top:2.5rem">See what the AI sees</h2>
     <div class="coach-layout">
@@ -111,7 +114,42 @@
 <script type="module">
   import { initPage, $ } from './js/ui.js';
   import { loadPoseModel, startCamera, runLoop, drawSkeleton, CAMERA_HELP } from './js/pose.js';
+  import { ready } from './js/motion.js';
   initPage();
+
+  // Pinned pipeline: scroll lights up data → training → prediction → our rules
+  ready().then((gsap) => {
+    if (!gsap) return;
+    const pipes = [...document.querySelectorAll('.pipe')];
+    const line = document.querySelector('.pipe-line span');
+    const mm = gsap.matchMedia();
+    mm.add({ desk: '(min-width: 861px)', mob: '(max-width: 860px)' }, (ctx) => {
+      gsap.set(pipes, { autoAlpha: 0.25, scale: 0.94, y: 30 });
+      gsap.set(line, { scaleX: 0 });
+      if (ctx.conditions.desk) {
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: { trigger: '#pipe-section', start: 'top 70px', end: '+=1400', pin: true, scrub: 1 },
+        });
+        pipes.forEach((p, i) => {
+          tl.to(line, { scaleX: (i + 1) / pipes.length, duration: 1 }, i)
+            .to(p, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: 'power2.out' }, i)
+            .add(() => pipes.forEach((q, k) => q.classList.toggle('is-active', k === i)), i + 0.3);
+        });
+        tl.to({}, { duration: 0.6 });
+      } else {
+        gsap.set(line, { scaleX: 1 });
+        pipes.forEach((p, i) => {
+          gsap.to(p, {
+            autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: 'expo.out',
+            scrollTrigger: { trigger: p, start: 'top 85%', toggleActions: 'play none none reverse',
+              onToggle: (self) => p.classList.toggle('is-active', self.isActive) },
+          });
+        });
+      }
+      return () => pipes.forEach((p) => p.classList.remove('is-active'));
+    });
+  });
 
   const NAMES = ['nose','left eye (inner)','left eye','left eye (outer)','right eye (inner)','right eye','right eye (outer)','left ear','right ear','mouth (left)','mouth (right)','left shoulder','right shoulder','left elbow','right elbow','left wrist','right wrist','left pinky','right pinky','left index','right index','left thumb','right thumb','left hip','right hip','left knee','right knee','left ankle','right ankle','left heel','right heel','left foot index','right foot index'];
   const video = $('#video'), canvas = $('#overlay');

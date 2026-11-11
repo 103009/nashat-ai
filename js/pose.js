@@ -3,32 +3,53 @@
 
 import { FilesetResolver, PoseLandmarker } from '../vendor/mediapipe/vision_bundle.mjs';
 
-let landmarkerPromise = null;
+const cache = {};             // one loaded model per engine ('GPU' / 'CPU')
+export const modelInfo = { delegate: null, loadMs: null, error: null };
 
-/** Load MediaPipe Pose Landmarker (lite) from this website's own files. */
-export function loadPoseModel() {
-  if (!landmarkerPromise) {
-    landmarkerPromise = (async () => {
+function withTimeout(promise, ms, msg) {
+  let t;
+  return Promise.race([promise, new Promise((_, rej) => { t = setTimeout(() => rej(new Error(msg)), ms); })])
+    .finally(() => clearTimeout(t));
+}
+
+/**
+ * Load MediaPipe Pose Landmarker (lite) from this website's own files.
+ * engine: 'auto' (try GPU, fall back to CPU), 'GPU' or 'CPU'.
+ */
+export function loadPoseModel(engine = 'auto') {
+  const key = engine === 'auto' ? 'auto' : engine;
+  if (!cache[key]) {
+    cache[key] = (async () => {
+      const t0 = performance.now();
       const base = new URL('../', import.meta.url);
-      const vision = await FilesetResolver.forVisionTasks(new URL('vendor/mediapipe/wasm', base).href);
-      const make = (delegate) => PoseLandmarker.createFromOptions(vision, {
+      const vision = await withTimeout(
+        FilesetResolver.forVisionTasks(new URL('vendor/mediapipe/wasm', base).href),
+        60000, 'The AI engine took too long to download. Check the internet connection and try again.');
+      const make = (delegate) => withTimeout(PoseLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: new URL('models/pose_landmarker_lite.task', base).href, delegate },
         runningMode: 'VIDEO',
         numPoses: 1,
         minPoseDetectionConfidence: 0.5,
         minPosePresenceConfidence: 0.5,
         minTrackingConfidence: 0.5,
-      });
-      try {
-        return await make('GPU');
-      } catch (e) {
-        console.warn('GPU not available, using CPU', e);
-        return await make('CPU');
+      }), 60000, 'The AI model took too long to load. Check the internet connection and try again.');
+      let landmarker, delegate;
+      if (engine === 'CPU') { landmarker = await make('CPU'); delegate = 'CPU'; }
+      else {
+        try { landmarker = await make('GPU'); delegate = 'GPU'; }
+        catch (e) {
+          if (engine === 'GPU') throw e;
+          console.warn('GPU engine not available, using CPU', e);
+          landmarker = await make('CPU'); delegate = 'CPU';
+        }
       }
+      Object.assign(modelInfo, { delegate, loadMs: Math.round(performance.now() - t0), error: null });
+      landmarker.__delegate = delegate;
+      return landmarker;
     })();
-    landmarkerPromise.catch(() => { landmarkerPromise = null; });
+    cache[key].catch((e) => { modelInfo.error = e.message || String(e); delete cache[key]; });
   }
-  return landmarkerPromise;
+  return cache[key];
 }
 
 /** Start the camera in a <video>. facing: 'user' (selfie) or 'environment' (back). */
@@ -67,11 +88,13 @@ export function stopVideo(video) {
 
 /**
  * Run the model on every new video frame.
- * onResult(landmarks|null, { aspect, t, fps, raw }) is called each time.
+ * onResult(landmarks|null, { aspect, t, fps }) is called each time.
+ * onError(error) is called if the model keeps failing (e.g. a broken GPU engine).
  * Returns a stop() function.
  */
-export function runLoop(video, landmarker, onResult) {
+export function runLoop(video, landmarker, onResult, onError) {
   let running = true;
+  let errors = 0;
   let lastVideoTime = -1;
   let lastTs = 0;
   let frames = 0, fpsT = performance.now(), fps = 0;
@@ -84,7 +107,11 @@ export function runLoop(video, landmarker, onResult) {
       if (ts <= lastTs) ts = lastTs + 1; // timestamps must always increase
       lastTs = ts;
       let res = null;
-      try { res = landmarker.detectForVideo(video, ts); } catch (e) { console.error(e); }
+      try { res = landmarker.detectForVideo(video, ts); errors = 0; }
+      catch (e) {
+        console.error(e);
+        if (++errors === 5 && onError) { running = false; onError(e); return; }
+      }
       frames++;
       if (ts - fpsT > 1000) { fps = (frames * 1000) / (ts - fpsT); frames = 0; fpsT = ts; }
       const lm = res?.landmarks?.[0] ?? null;
@@ -134,8 +161,10 @@ export function drawSkeleton(canvas, video, lm, { color = '#F97316', showAll = f
 }
 
 export const CAMERA_HELP = {
-  NotAllowedError: 'Camera permission was blocked. Allow camera access in your browser settings, then try again.',
-  NotFoundError: 'No camera was found on this device. You can use "Use a video file" instead.',
-  NotReadableError: 'The camera is being used by another app. Close it and try again.',
-  OverconstrainedError: 'This camera mode is not available. Try switching camera.',
+  NotAllowedError: 'Camera access is blocked. In Brave/Chrome, click the camera or lock icon at the right of the address bar, set Camera to Allow, then reload. On Windows also check Settings → Privacy & security → Camera → allow apps and desktop apps.',
+  SecurityError: 'Camera access is blocked for this page. Open the site through its https:// link, not as a file.',
+  NotFoundError: 'No camera was found. Plug in a webcam (or check Windows Settings → Privacy & security → Camera), or use "Use a video file" instead.',
+  NotReadableError: 'The camera is busy or blocked. Close other apps using it (Zoom, Teams, Camera app) and try again.',
+  AbortError: 'The camera could not start. Close other apps using it and try again.',
+  OverconstrainedError: 'This camera mode is not available. Try "Switch camera".',
 };

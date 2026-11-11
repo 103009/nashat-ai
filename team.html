@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.add('js-motion')</script>
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
 </head>
 <body>
 <main id="main" class="section">
@@ -28,7 +28,8 @@
   <path class="draw" d="M150 30q20-22 40 0" stroke="#FDBA74" stroke-width="4" fill="none" stroke-linecap="round"/>
 </svg></div>
     </div>
-    <div class="grid grid-3" id="team" style="margin-bottom:2.5rem"></div>
+    <div id="leader"></div>
+    <div class="grid team-grid" id="team" style="margin-bottom:2.5rem"></div>
 
     <div class="split">
       <section class="card">
@@ -66,6 +67,7 @@
         <li><strong>Weather data:</strong> <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>, CC BY 4.0.</li>
         <li><strong>Heat index formula:</strong> US National Weather Service (Rothfusz regression).</li>
         <li><strong>Animations:</strong> GSAP by GreenSock, Standard "no charge" licence. Motion presets follow the UI UX Pro Max design skill.</li>
+        <li><strong>Smooth scrolling:</strong> Lenis by darkroom.engineering, MIT License.</li>
         <li><strong>QR code generator:</strong> qrcode-generator by Kazuhiko Arase, MIT License.</li>
         <li><strong>Illustrations:</strong> drawn for this project (Manama skyline, figures, diagrams); phone images are screenshots of this website.</li>
         <li><strong>Fonts:</strong> Barlow & Barlow Condensed by Jeremy Tribby, SIL Open Font License (bundled with the site).</li>
@@ -77,18 +79,35 @@
 </main>
 
 <script type="module">
-  import { initPage, $, esc } from './js/ui.js';
+  import { initPage, $, esc, icon } from './js/ui.js';
   import { CONFIG } from './js/config.js';
   import qrcode from './vendor/qrcode.mjs';
   initPage();
 
   $('#team-eyebrow').textContent = `${CONFIG.event} · ${CONFIG.field}${CONFIG.teamNumber ? ' · Team ' + CONFIG.teamNumber : ''}`;
   const initials = (n) => n.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
-  $('#team').innerHTML = CONFIG.team.map((m) => `
-    <div class="card member">
+  const lead = CONFIG.team.find((m) => m.leader);
+  if (lead) {
+    $('#leader').innerHTML = `
+      <article class="leader-card" data-reveal data-tilt>
+        <div class="avatar" aria-hidden="true">${esc(initials(lead.name))}</div>
+        <div>
+          <span class="leader-badge">${icon('crown')} Team leader</span>
+          <h3>${esc(lead.name)}</h3>
+          <p class="member-role" style="font-size:1.15rem">${esc(lead.role)}</p>
+          <p class="muted" style="margin:0">${esc(lead.about || '')}</p>
+        </div>
+      </article>`;
+  }
+  $('#team').innerHTML = CONFIG.team.filter((m) => !m.leader).map((m) => `
+    <article class="card member" data-tilt>
       <div class="avatar" aria-hidden="true">${esc(initials(m.name))}</div>
-      <div><h3 style="margin:0">${esc(m.name)}</h3><p class="muted" style="margin:0">${esc(m.role || 'Role: add in js/config.js')}</p></div>
-    </div>`).join('');
+      <div>
+        <h3 style="margin:0">${esc(m.name)}</h3>
+        <p class="member-role">${esc(m.role || 'Role: add in js/config.js')}</p>
+        <p class="muted small">${esc(m.about || '')}</p>
+      </div>
+    </article>`).join('');
 
   const statement = CONFIG.ethicsStatement.trim();
   $('#ethics').innerHTML = statement

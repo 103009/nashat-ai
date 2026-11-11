@@ -1,9 +1,9 @@
 import { initPage, $, $$, speak, toast, fmtTime, esc } from './ui.js';
-import { loadPoseModel, startCamera, startFile, stopVideo, runLoop, drawSkeleton, CAMERA_HELP } from './pose.js';
+import { loadPoseModel, startCamera, startFile, stopVideo, runLoop, drawSkeleton, CAMERA_HELP, modelInfo } from './pose.js';
 import { createAnalyzer, EXERCISES, CUES } from './exercises.js';
 import { DEFAULT_PLAN } from './heat.js';
 import { load, save, getSettings, saveSettings } from './store.js';
-import { pop, nudge } from './motion.js';
+import { pop, nudge, motionOn, deviceReducesMotion, scrollToEl } from './motion.js';
 
 initPage();
 
@@ -241,30 +241,122 @@ function endSessionAfterSets() {
 }
 
 // ── start / stop ──
+let engine = load('engine', 'auto');
+
 async function start(kind, file) {
   $('#start-btn').disabled = true;
-  status('Loading the AI model (about 6 MB the first time)…');
   setCue('');
+  stopLoop?.(); stopLoop = null;
   try {
-    const modelP = loadPoseModel();
-    if (kind === 'file') { source = 'video file'; await startFile(video, file); stage.classList.remove('mirror'); }
-    else { source = 'camera'; await startCamera(video, facing); stage.classList.toggle('mirror', facing === 'user'); }
-    const landmarker = await modelP;
+    // Step 1: camera (or video file)
+    status(kind === 'file' ? 'Opening the video…' : 'Starting the camera… (allow access if your browser asks)');
+    try {
+      if (kind === 'file') { source = 'video file'; await startFile(video, file); stage.classList.remove('mirror'); }
+      else { source = 'camera'; await startCamera(video, facing); stage.classList.toggle('mirror', facing === 'user'); }
+    } catch (e) {
+      console.error(e);
+      const msg = CAMERA_HELP[e.name] || e.message || 'The camera could not start.';
+      status('Camera problem: ' + msg);
+      toast('Camera problem. See Troubleshoot.', 'warn');
+      openTrouble();
+      return;
+    }
+
+    // Step 2: AI model
+    status('Camera on ✓  Loading the AI model (about 20 MB the first time, then it is saved by the browser)…');
+    let landmarker;
+    try {
+      landmarker = await loadPoseModel(engine);
+    } catch (e) {
+      console.error(e);
+      stopVideo(video);
+      status('AI model problem: ' + (e.message || e) + ' Try "AI engine: CPU" in Troubleshoot, then press Start again.');
+      toast('The AI model could not load. See Troubleshoot.', 'warn');
+      openTrouble();
+      return;
+    }
+
     $('#empty').classList.add('hidden');
     $('#stop-btn').classList.remove('hidden');
-    status(`AI model ready. Running on this device (${kind === 'file' ? 'video file' : 'camera'}).`);
-    stopLoop?.();
-    stopLoop = runLoop(video, landmarker, onFrame);
+    status(`Camera on ✓  AI ready ✓ (${landmarker.__delegate} engine). Everything runs on this device.`);
+    stopLoop = runLoop(video, landmarker, onFrame, onEngineError);
     beginSession();
-  } catch (e) {
-    console.error(e);
-    const msg = CAMERA_HELP[e.name] || e.message || 'Something went wrong starting the coach.';
-    status(msg);
-    toast(msg, 'warn');
   } finally {
     $('#start-btn').disabled = false;
   }
 }
+
+// If the graphics-card engine keeps failing, switch to the CPU engine automatically.
+async function onEngineError(e) {
+  if (engine !== 'CPU') {
+    engine = 'CPU';
+    save('engine', 'CPU');
+    $('#engine').value = 'CPU';
+    toast('The graphics engine failed, so the AI switched to CPU mode.', 'warn');
+    status('Switching the AI to CPU mode…');
+    try {
+      const lm = await loadPoseModel('CPU');
+      stopLoop = runLoop(video, lm, onFrame, onEngineError);
+      status('Camera on ✓  AI ready ✓ (CPU engine).');
+      return;
+    } catch (err) { e = err; }
+  }
+  status('The AI stopped working on this computer: ' + (e.message || e) + ' Open Troubleshoot and run the system check.');
+  openTrouble();
+}
+
+// ── Troubleshoot panel ──
+$('#engine').value = engine;
+$('#engine').addEventListener('change', () => {
+  engine = $('#engine').value;
+  save('engine', engine);
+  toast(`AI engine set to ${engine === 'auto' ? 'Auto' : engine}. Press Start camera.`);
+});
+function openTrouble() {
+  const d = $('#trouble');
+  if (!d.open) { d.open = true; runChecks(); }
+  scrollToEl(d);
+}
+async function runChecks() {
+  const list = $('#checks');
+  const rows = [];
+  const render = () => {
+    list.innerHTML = rows.map((r) => `<li class="check ${r.ok === true ? 'ok' : r.ok === false ? 'bad' : 'warn'}">
+      <span class="check-mark" aria-hidden="true">${r.ok === true ? '✓' : r.ok === false ? '✗' : '!'}</span>
+      <span><strong>${esc(r.label)}</strong><br><span class="muted small">${esc(r.detail)}</span></span></li>`).join('');
+  };
+  const add = (ok, label, detail) => { const r = { ok, label, detail }; rows.push(r); render(); return r; };
+
+  add(window.isSecureContext, 'Secure page (https)', window.isSecureContext ? 'OK' : 'Open the site through its https:// link. Opening the file from your computer blocks the camera.');
+  const camApi = !!navigator.mediaDevices?.getUserMedia;
+  add(camApi, 'Browser camera support', camApi ? 'OK' : 'This browser cannot use cameras. Try Chrome, Edge or Brave.');
+  try {
+    const st = await navigator.permissions.query({ name: 'camera' });
+    add(st.state === 'denied' ? false : st.state === 'granted' ? true : null, 'Camera permission',
+      st.state === 'granted' ? 'Allowed' : st.state === 'prompt' ? 'Not decided yet. Your browser will ask when you press Start camera.' : CAMERA_HELP.NotAllowedError);
+  } catch { add(null, 'Camera permission', 'Could not be checked here (that is OK).'); }
+  try {
+    const cams = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
+    add(cams.length > 0, 'Cameras found', cams.length ? `${cams.length} camera${cams.length > 1 ? 's' : ''}` : CAMERA_HELP.NotFoundError);
+  } catch { add(null, 'Cameras found', 'Could not be checked.'); }
+  const wasm = typeof WebAssembly === 'object';
+  add(wasm, 'WebAssembly (runs the AI)', wasm ? 'OK' : 'Your browser is too old. Please update it.');
+  let gl = false;
+  try { gl = !!document.createElement('canvas').getContext('webgl2'); } catch { /* no */ }
+  add(gl ? true : null, 'Graphics acceleration (WebGL2)', gl ? 'OK: the fast GPU engine can be used'
+    : 'Not available, so the AI will use the CPU engine (slower). In Brave: Settings → System → turn on "Use graphics acceleration when available", then restart Brave.');
+  const m = add(null, 'AI model', 'Loading…');
+  try {
+    const lm = await loadPoseModel(engine);
+    Object.assign(m, { ok: true, detail: `Loaded with the ${lm.__delegate} engine${modelInfo.loadMs ? ` in ${(modelInfo.loadMs / 1000).toFixed(1)} s` : ''}.` });
+  } catch (e) {
+    Object.assign(m, { ok: false, detail: `${e.message || e} Try "AI engine: CPU", lower Brave Shields for this site (lion icon in the address bar), and reload.` });
+  }
+  render();
+  add(motionOn() ? true : null, 'Animations', motionOn() ? 'On'
+    : deviceReducesMotion() ? 'Off because your computer asks for less motion. Use the Motion switch at the top of the page to turn them on.' : 'Turned off with the Motion switch at the top of the page.');
+}
+$('#check-btn').addEventListener('click', runChecks);
 
 function stopAll() {
   endSession(true);
@@ -293,4 +385,4 @@ $('#file-input').addEventListener('change', (e) => {
 document.addEventListener('visibilitychange', () => { if (document.hidden && stopLoop) stopAll(); });
 
 // Load the model in the background so "Start" is quick.
-loadPoseModel().then(() => status('AI model loaded and ready.')).catch(() => status('The AI model will load when you press Start.'));
+loadPoseModel(engine).then((lm) => status(`AI model loaded and ready (${lm.__delegate} engine). Press Start camera.`)).catch(() => status('The AI model will load when you press Start camera.'));

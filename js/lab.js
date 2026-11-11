@@ -2,7 +2,7 @@ import { initPage, $, $$, esc, toast } from './ui.js';
 import { load, save, remove, getSettings, saveSettings, DEFAULT_SETTINGS } from './store.js';
 import { CONFIG } from './config.js';
 import { EXERCISES } from './exercises.js';
-import { growBars, pop } from './motion.js';
+import { growBars, pop, scrollToEl } from './motion.js';
 
 initPage();
 
@@ -242,4 +242,4 @@ $('#reset-settings').addEventListener('click', () => {
 });
 
 renderAll();
-if (location.hash === '#new') $('#new').scrollIntoView();
+if (location.hash === '#new') setTimeout(() => scrollToEl($('#new')), 300);

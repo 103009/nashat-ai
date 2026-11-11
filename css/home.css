@@ -77,6 +77,11 @@ body.home .site-footer { margin-top: 0; }
   padding-inline: max(1rem, calc((100vw - 1120px) / 2)) 10vw;
 }
 .how-h.is-horizontal .h-panel { width: clamp(340px, 34vw, 460px); flex: none; }
+@media (max-width: 860px) {
+  .how-h.is-horizontal .h-panel { width: 82vw; }
+  .how-h.is-horizontal .h-art { aspect-ratio: 16 / 10; }
+  .how-h.is-horizontal { padding: 1.5rem 0; }
+}
 
 /* phones */
 .screens h2 { margin-bottom: 2.5rem; }

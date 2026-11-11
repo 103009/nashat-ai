@@ -68,15 +68,27 @@ js/motion.js     animations (GSAP): page intro, scroll reveals, illustrations, c
 js/home.js       home page scroll story: pinned heat gauge, horizontal steps, parallax
 css/home.css     home page layout · css/fonts.css: self-hosted Barlow fonts
 assets/shots/    screenshots of the app used on the home page
-vendor/          MediaPipe runtime (Apache 2.0), GSAP (GreenSock standard licence), QR generator (MIT)
+vendor/          MediaPipe runtime (Apache 2.0), GSAP (GreenSock standard licence), Lenis (MIT), QR generator (MIT)
 models/          pose_landmarker_lite.task: the trained AI model (about 6 MB)
 ```
 
 Everything the AI needs is bundled in the site, so it does not depend on outside
 CDNs at the symposium. Only the live weather button needs internet; fonts and animations are bundled too.
 
+## Animations & smooth scrolling
+
+- Animations use GSAP (ScrollTrigger, SplitText, DrawSVG); smooth scrolling uses Lenis, driven by GSAP's ticker.
+- They follow the computer's "reduce motion" setting. Visitors can override it with the **Motion** switch in the header
+  (the choice is remembered). If Windows "Animation effects" is off, the site shows a notice with a "Turn on animations" button.
+
+## If the AI coach won't start
+
+Open **Troubleshoot** on the AI coach page and press **Run system check**. It checks https, camera permission,
+cameras found, WebAssembly, graphics acceleration and the AI model, and explains how to fix each one.
+Set **AI engine: CPU** if the graphics engine fails (the coach also switches automatically).
+
 ## Credits
 
 MediaPipe Pose Landmarker © Google (Apache 2.0) · Open-Meteo weather (CC BY 4.0) ·
-qrcode-generator © Kazuhiko Arase (MIT) · GSAP © GreenSock (standard no-charge licence) · Barlow fonts (SIL OFL) · Lucide-style icons (ISC).
+qrcode-generator © Kazuhiko Arase (MIT) · GSAP © GreenSock (standard no-charge licence) · Lenis © darkroom.engineering (MIT) · Barlow fonts (SIL OFL) · Lucide-style icons (ISC).
 Built with coding help from Claude (Anthropic), as the symposium rules allow.

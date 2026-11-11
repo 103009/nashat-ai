@@ -19,15 +19,13 @@ export const CONFIG = {
   // use whatever address the page is opened from.
   siteUrl: 'https://103009.github.io/nashat-ai/',
 
-  // Fill in each person's role from your approved proposal.
-  // Roles from the guide: Project Lead, AI / Tech Lead, Research & Ethics Lead,
-  // Design & Comms Lead, Data & Testing Lead (teams of 5).
+  // Team roles (role descriptions from the AI Symposium 2027 guide, page 4).
   team: [
-    { name: 'Saqer Alnoaimi', role: '' },
-    { name: 'Ahmed Alathem', role: '' },
-    { name: 'Ahmed Alkhaldi', role: '' },
-    { name: 'Mohammed Alashraaf', role: '' },
-    { name: 'Saif Buhindi', role: '' },
+    { name: 'Saqer Alnoaimi', role: 'Project Lead', leader: true, about: 'Leads the team, keeps everyone on schedule and runs our meetings.' },
+    { name: 'Ahmed Alathem', role: 'AI / Tech Lead', about: 'Leads building and testing the AI coach and the website.' },
+    { name: 'Ahmed Alkhaldi', role: 'Research & Ethics Lead', about: 'Leads the research and the ethics & impact statement.' },
+    { name: 'Mohammed Alashraaf', role: 'Design & Comms Lead', about: 'Leads the brochure, visuals and the pitch script.' },
+    { name: 'Saif Buhindi', role: 'Data & Testing Lead', about: 'Runs tests with real users and records the results.' },
   ],
 
   // Paste your team's OWN ethics & impact statement here (~200 words).

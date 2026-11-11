@@ -136,8 +136,7 @@ ready().then((gsap) => {
       defaults: { ease: 'none' },
       onUpdate: draw,
       scrollTrigger: {
-        trigger: section, start: 'top top', end: '+=1600', pin: true, scrub: 0.6,
-        snap: { snapTo: 'labels', duration: { min: 0.2, max: 0.6 }, ease: 'power1.inOut' },
+        trigger: section, start: 'top top', end: '+=1800', pin: true, scrub: 1,
       },
     });
     story3.addLabel('s0').to(g, { hi: story[0], duration: 1 });
@@ -153,13 +152,13 @@ ready().then((gsap) => {
     const how = $('#how-h');
     const track = $('.h-track');
     let containerAnimation = null;
-    if (desktop) {
+    {
       how.classList.add('is-horizontal');
       const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
       containerAnimation = gsap.to(track, {
         x: () => -distance(),
         ease: 'none', // required for containerAnimation
-        scrollTrigger: { trigger: how, start: 'top top', end: () => '+=' + distance(), pin: true, scrub: 0.6, invalidateOnRefresh: true },
+        scrollTrigger: { trigger: how, start: 'top top', end: () => '+=' + distance(), pin: true, scrub: 1, invalidateOnRefresh: true },
       });
     }
     const panelST = (panel) => (containerAnimation

@@ -1,6 +1,7 @@
 // Shared page chrome: navigation, footer, voice, small helpers.
 import { CONFIG } from './config.js';
 import { getSettings } from './store.js';
+import { autoAnimate, setupPageTransitions, motionOn, motionPref, setMotionPref, deviceReducesMotion } from './motion.js';
 
 // Simple line icons (Lucide style, MIT licence).
 export const ICONS = {
@@ -26,6 +27,8 @@ export const ICONS = {
   arrow: '<path d="M5 12h14M13 5l7 7-7 7"/>',
   trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',
   upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/>',
+  sparkles: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4M17 5h4M5 17v4M3 19h4"/>',
+  crown: '<path d="M2 7l5 4 5-7 5 7 5-4-2 12H4z"/><path d="M4 21h16"/>',
 };
 
 export const icon = (name, cls = 'icon') =>
@@ -57,8 +60,35 @@ export function initPage() {
         <span class="brand-text">${CONFIG.appName}<small lang="ar">${CONFIG.appNameArabic}</small></span>
       </a>
       <nav class="top-nav" aria-label="Main">${links}</nav>
+      <button class="motion-toggle" type="button" aria-pressed="${motionOn()}" title="Turn animations and smooth scrolling on or off">
+        ${icon('sparkles')}<span>Motion: ${motionOn() ? 'on' : 'off'}</span>
+      </button>
     </div>`;
   document.body.prepend(header);
+  header.querySelector('.motion-toggle').addEventListener('click', () => {
+    setMotionPref(motionOn() ? 'off' : 'on');
+    location.reload();
+  });
+
+  // The device asks for less motion and the visitor hasn't chosen yet: offer to turn it on.
+  if (motionPref() === 'auto' && deviceReducesMotion()) {
+    const note = document.createElement('div');
+    note.className = 'motion-note';
+    note.setAttribute('role', 'region');
+    note.setAttribute('aria-label', 'Animations');
+    note.innerHTML = `<div class="wrap motion-note-inner">
+        <p>${icon('sparkles')} <span>Animations are paused because your computer's <strong>reduce motion</strong> setting is on.</span></p>
+        <div class="btn-row"><button class="btn btn-sm btn-primary" type="button" data-motion="on">Turn on animations</button>
+        <button class="btn btn-sm btn-ghost" type="button" data-motion="off">Keep them off</button></div>
+      </div>`;
+    header.after(note);
+    note.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-motion]');
+      if (!b) return;
+      setMotionPref(b.dataset.motion);
+      if (b.dataset.motion === 'on') location.reload(); else note.remove();
+    });
+  }
 
   const tab = document.createElement('nav');
   tab.className = 'tab-bar';
@@ -75,7 +105,8 @@ export function initPage() {
     </div>`;
   document.body.append(footer);
 
-  import('./motion.js').then((m) => m.autoAnimate()).catch(() => document.documentElement.classList.remove('js-motion'));
+  setupPageTransitions();
+  autoAnimate().catch((e) => { console.warn(e); document.documentElement.classList.remove('js-motion'); });
 }
 
 // ── voice coaching ──
