@@ -64,13 +64,16 @@ js/coach.js      the coach page: sets, rest, timers, voice, summary
 js/lab.js        test logging, accuracy maths, CSV export, tuning sliders
 js/store.js      saves data in the browser (localStorage); default AI-rule settings
 js/ui.js         navigation, footer, voice, small helpers
-js/motion.js     animations (GSAP): page intro, scroll reveals, count-ups, rep pop
+js/motion.js     animations (GSAP): page intro, scroll reveals, illustrations, count-ups
+js/home.js       home page scroll story: pinned heat gauge, horizontal steps, parallax
+css/home.css     home page layout · css/fonts.css: self-hosted Barlow fonts
+assets/shots/    screenshots of the app used on the home page
 vendor/          MediaPipe runtime (Apache 2.0), GSAP (GreenSock standard licence), QR generator (MIT)
 models/          pose_landmarker_lite.task: the trained AI model (about 6 MB)
 ```
 
 Everything the AI needs is bundled in the site, so it does not depend on outside
-CDNs at the symposium. Only the live weather button and the Google font need internet.
+CDNs at the symposium. Only the live weather button needs internet; fonts and animations are bundled too.
 
 ## Credits
 

@@ -7,186 +7,267 @@
   <meta name="description" content="Nashat uses on-device AI pose detection to count your reps, check your form and keep your workout safe in Bahrain's heat.">
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/home.css">
   <script>document.documentElement.classList.add('js-motion')</script>
 </head>
-<body>
+<body class="home">
 <main id="main">
-  <section class="hero">
+
+  <!-- ───────── HERO ───────── -->
+  <section class="hero hero-v2" id="hero">
     <div class="wrap hero-grid">
-      <div>
+      <div class="hero-copy">
         <span class="eyebrow intro">AI Symposium 2027 · Sport</span>
         <h1 data-split>Train smart.<br><span>Beat the heat.</span></h1>
         <p class="lead intro">Nashat is an AI coach in your browser. It watches your movement through the camera, counts your reps, corrects your form, and plans a workout that is safe for today's Bahrain weather.</p>
         <div class="btn-row intro">
-          <a class="btn btn-primary btn-lg" href="coach.html" id="cta-coach">Try the AI coach <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <a class="btn btn-primary btn-lg" href="coach.html">Try the AI coach <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
           <a class="btn btn-ghost btn-lg" href="heat.html">Check today's heat</a>
         </div>
         <p class="small muted intro" style="margin-top:1rem">No sign-up. No download. Your video never leaves your phone.</p>
       </div>
-      <div class="hero-visual" aria-hidden="true">
-        <!-- Illustration: a skeleton figure in a squat, like the AI sees it -->
-        <svg viewBox="0 0 400 500">
-          <defs>
-            <radialGradient id="sunG" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#F97316" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <circle cx="320" cy="90" r="90" fill="url(#sunG)"/>
-          <circle cx="320" cy="90" r="34" fill="#FB923C"/>
-          <g stroke="#2E3A50" stroke-width="1">
-            <path d="M0 420H400M0 380H400M0 340H400M0 300H400"/>
-          </g>
-          <g id="fig" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.92">
-            <path id="fig-body" d="M180 170 L200 240"/>
-            <path id="fig-arm" d="M180 170 L235 200 L280 205"/>
-            <path id="fig-leg" d="M200 240 L265 285 L240 360 L270 362"/>
-          </g>
-          <g id="fig-dots" fill="#F97316">
-            <circle id="d-head" cx="170" cy="140" r="20"/>
-            <circle id="d-sh" cx="180" cy="170" r="8"/><circle id="d-el" cx="235" cy="200" r="8"/><circle id="d-wr" cx="280" cy="205" r="8"/>
-            <circle id="d-hip" cx="200" cy="240" r="8"/><circle id="d-an" cx="240" cy="360" r="8"/>
-          </g>
-          <circle id="d-knee" cx="265" cy="285" r="11" fill="#22C55E"/>
-          <g font-family="Barlow Condensed, sans-serif" font-weight="700">
-            <g id="knee-tag">
-              <rect id="knee-box" x="282" y="268" rx="10" width="92" height="36" fill="#0F1420" stroke="#22C55E"/>
-              <text id="knee-text" x="328" y="293" fill="#86EFAC" font-size="22" text-anchor="middle">KNEE 92°</text>
+
+      <div class="hero-stage">
+        <div class="hero-visual" aria-hidden="true">
+          <svg viewBox="0 0 400 500">
+            <defs>
+              <radialGradient id="sunG" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g id="hero-sun"><circle cx="320" cy="90" r="90" fill="url(#sunG)"/><circle cx="320" cy="90" r="34" fill="#FB923C"/></g>
+            <g stroke="#2E3A50" stroke-width="1"><path d="M0 420H400M0 380H400M0 340H400M0 300H400"/></g>
+            <g id="fig" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.92">
+              <path id="fig-body" d=""/><path id="fig-arm" d=""/><path id="fig-leg" d=""/>
             </g>
-            <rect id="cue-box" x="30" y="430" rx="12" width="340" height="48" fill="#0F1420" stroke="#22C55E" stroke-width="2"/>
-            <text id="cue-text" x="200" y="462" fill="#86EFAC" font-size="24" text-anchor="middle">GOOD DEPTH · REP 7</text>
+            <g fill="#F97316">
+              <circle id="d-head" r="20"/><circle id="d-sh" r="8"/><circle id="d-el" r="8"/><circle id="d-wr" r="8"/>
+              <circle id="d-hip" r="8"/><circle id="d-an" r="8"/>
+            </g>
+            <circle id="d-knee" r="11" fill="#22C55E"/>
+            <g font-family="Barlow Condensed, sans-serif" font-weight="700">
+              <rect id="knee-box" rx="10" width="92" height="36" fill="#0F1420" stroke="#22C55E"/>
+              <text id="knee-text" fill="#86EFAC" font-size="22" text-anchor="middle">KNEE 92°</text>
+              <rect id="cue-box" x="30" y="430" rx="12" width="340" height="48" fill="#0F1420" stroke="#22C55E" stroke-width="2"/>
+              <text id="cue-text" x="200" y="462" fill="#86EFAC" font-size="24" text-anchor="middle">GOOD DEPTH · REP 7</text>
+            </g>
+          </svg>
+        </div>
+        <div class="chip chip-a" data-speed="-60"><span class="chip-dot" style="background:var(--primary)"></span>33 body points</div>
+        <div class="chip chip-b" data-speed="-120"><span class="chip-dot" style="background:var(--accent)"></span>Runs on your phone</div>
+        <div class="chip chip-c" data-speed="-30"><span class="chip-dot" style="background:var(--info)"></span>Voice coaching</div>
+      </div>
+    </div>
+
+    <!-- Original illustration: Manama skyline (World Trade Center sails, Financial Harbour towers, palms) -->
+    <svg class="skyline" viewBox="0 0 1440 240" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <g class="sky-far" fill="#1B2538">
+        <path d="M0 240V180h40v-30h30v50h26v-70h34v70h30v-40h40v60h28v-90h36v90h30v-50h44v50h38v-30h40v40h30v-80h36v80h40v-60h34v60h36v-40h30v-50h40v90h36v-60h42v60h30v-100h38v100h36v-40h40v40h34v-70h32v70h40v-30h46v50h30v-80h40v80h36v-40h40v60h30v-50h40v70h34V240z"/>
+      </g>
+      <g class="sky-near" fill="#111827">
+        <path d="M120 240c4-40 6-70 4-96M124 144c-18-6-34-2-46 10M124 144c16-10 34-10 48 0M124 144c-6-14-18-24-34-26M124 144c8-14 22-22 38-20M124 144c-14 0-26 10-30 24M124 144c12 2 24 12 26 26" stroke="#111827" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M1320 240c-3-34-4-58-2-82M1318 158c-16-6-30-2-40 8M1318 158c14-9 30-9 42 0M1318 158c-5-12-16-21-30-23M1318 158c7-12 19-19 33-17" stroke="#111827" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <rect x="240" y="150" width="46" height="90"/><rect x="296" y="120" width="38" height="120"/><rect x="344" y="168" width="54" height="72"/>
+        <path d="M560 240 Q572 120 610 30 L624 30 Q616 140 632 240Z"/>
+        <path d="M724 240 Q712 120 674 30 L660 30 Q668 140 652 240Z"/>
+        <rect x="620" y="86" width="44" height="6"/><rect x="616" y="132" width="52" height="6"/><rect x="612" y="178" width="60" height="6"/>
+        <g fill="none" stroke="#111827" stroke-width="4"><circle cx="642" cy="74" r="10"/><circle cx="642" cy="120" r="11"/><circle cx="642" cy="166" r="12"/></g>
+        <path d="M860 240V70l40-20v190z"/><path d="M916 240V50l44-22v212z"/>
+        <rect x="980" y="140" width="50" height="100"/><rect x="1040" y="110" width="34" height="130"/><rect x="1084" y="160" width="60" height="80"/>
+        <rect x="1160" y="130" width="40" height="110"/><rect x="420" y="190" width="90" height="50"/><rect x="760" y="176" width="70" height="64"/>
+        <rect x="0" y="228" width="1440" height="12"/>
+      </g>
+    </svg>
+  </section>
+
+  <!-- ───────── MARQUEE ───────── -->
+  <section class="marquee" aria-hidden="true">
+    <div class="marquee-row" data-dir="-1"><span>Computer vision</span><b>·</b><span>33 body points</span><b>·</b><span>Runs on your phone</span><b>·</b><span>Heat-smart plans</span><b>·</b><span>Ramadan mode</span><b>·</b><span>Voice coaching</span><b>·</b><span>Computer vision</span><b>·</b><span>33 body points</span><b>·</b></div>
+    <div class="marquee-row outline" data-dir="1"><span>Squats</span><b>·</b><span>Push-ups</span><b>·</b><span>Jumping jacks</span><b>·</b><span>Made in Bahrain</span><b>·</b><span>Squats</span><b>·</b><span>Push-ups</span><b>·</b><span>Jumping jacks</span><b>·</b><span>Made in Bahrain</span><b>·</b></div>
+  </section>
+
+  <!-- ───────── HEAT STORY (pinned) ───────── -->
+  <section class="heat-story" id="heat-story">
+    <div class="wrap heat-story-inner">
+      <div class="story-text">
+        <span class="eyebrow">The problem</span>
+        <h2>Bahrain's summer is a fitness problem</h2>
+        <div class="story-steps">
+          <article class="story-step" data-step="0">
+            <h3>It's hot…</h3>
+            <p>Say it's <strong>32 °C</strong> with 45% humidity, a normal summer morning. That already feels like <strong class="hi-out" data-t="32" data-rh="45">–</strong>.</p>
+          </article>
+          <article class="story-step" data-step="1">
+            <h3>…and it's humid</h3>
+            <p>Sea air adds humidity, so sweat can't cool you down. <strong>36 °C</strong> at 55% feels like <strong class="hi-out" data-t="36" data-rh="55">–</strong>.</p>
+          </article>
+          <article class="story-step" data-step="2">
+            <h3>Danger zone</h3>
+            <p><strong>38 °C</strong> at 65% feels like <strong class="hi-out" data-t="38" data-rh="65">–</strong>: <em>extreme danger</em>. Nashat moves your workout indoors, makes it shorter and adds more rest.</p>
+          </article>
+        </div>
+      </div>
+      <div class="gauge" aria-hidden="true">
+        <svg viewBox="0 0 200 420">
+          <defs>
+            <linearGradient id="heatG" gradientUnits="userSpaceOnUse" x1="0" y1="406" x2="0" y2="24">
+              <stop offset="0" stop-color="#22C55E"/><stop offset="0.35" stop-color="#EAB308"/>
+              <stop offset="0.6" stop-color="#F97316"/><stop offset="0.85" stop-color="#EF4444"/><stop offset="1" stop-color="#A855F7"/>
+            </linearGradient>
+            <clipPath id="tubeClip"><rect x="70" y="20" width="60" height="320" rx="30"/><circle cx="100" cy="360" r="46"/></clipPath>
+          </defs>
+          <rect x="70" y="20" width="60" height="320" rx="30" fill="#1C2434" stroke="#2E3A50" stroke-width="3"/>
+          <circle cx="100" cy="360" r="46" fill="#1C2434" stroke="#2E3A50" stroke-width="3"/>
+          <g clip-path="url(#tubeClip)">
+            <rect id="gauge-fill" x="60" y="20" width="80" height="400" fill="url(#heatG)"/>
           </g>
+          <g stroke="#B6C2D4" stroke-width="2" opacity="0.6"><path d="M140 60h16M140 120h10M140 180h16M140 240h10M140 300h16"/></g>
         </svg>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-tight">
-    <div class="wrap">
-      <div class="grid grid-3">
-        <div class="card">
-          <span class="badge badge-rule">The problem</span>
-          <h3 style="margin-top:0.75rem">Summer heat in Bahrain</h3>
-          <p class="muted">From June to September it is often too hot and humid to exercise outside safely in the middle of the day. Many people don't know when it is safe and when it is not.</p>
-        </div>
-        <div class="card">
-          <span class="badge badge-rule">The problem</span>
-          <h3 style="margin-top:0.75rem">Training alone at home</h3>
-          <p class="muted">When it is too hot outside, people train indoors with no coach. Bad form, like shallow squats or sagging push-ups, wastes effort and can cause injury.</p>
-        </div>
-        <div class="card">
-          <span class="badge badge-ai">Our AI solution</span>
-          <h3 style="margin-top:0.75rem">A coach in your phone</h3>
-          <p class="muted">Computer vision finds 33 points on your body in every video frame. Nashat turns them into joint angles to count reps and give feedback by voice, live.</p>
+        <div class="gauge-readout">
+          <span class="gauge-label">Feels like</span>
+          <span class="gauge-num"><span id="gauge-num">57</span>°C</span>
+          <span class="heat-level" id="gauge-level">Extreme danger</span>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="wrap">
-      <span class="eyebrow">How to use it</span>
-      <h2>Three steps</h2>
-      <div class="grid grid-3 steps">
-        <div class="card step">
-          <h3>Check the heat</h3>
-          <p class="muted">Get Manama's live temperature and humidity. Nashat works out the heat index, finds the coolest time to train today, and sets a safe plan. It also has a fasting mode for Ramadan.</p>
-          <a href="heat.html">Heat check <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
-        </div>
-        <div class="card step">
-          <h3>Train with the AI</h3>
-          <p class="muted">Pick squats, push-ups or jumping jacks. Prop up your phone, step back, and the AI coach counts reps, checks your form and times your rest breaks.</p>
-          <a href="coach.html">AI coach <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
-        </div>
-        <div class="card step">
-          <h3>See how it works</h3>
-          <p class="muted">Watch the AI's view of your body: the 33 landmarks and how sure it is about each one. Then see where it works well and where it fails.</p>
-          <a href="how.html">How it works <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
-        </div>
+  <!-- ───────── HOW IT WORKS (horizontal on desktop) ───────── -->
+  <section class="how-h" id="how-h">
+    <div class="wrap how-h-head">
+      <span class="eyebrow">How Nashat works</span>
+      <h2>From camera to coach in four steps</h2>
+    </div>
+    <div class="h-viewport">
+      <div class="h-track">
+        <article class="h-panel" id="p-camera">
+          <div class="h-art">
+            <svg viewBox="0 0 320 240" aria-hidden="true">
+              <rect x="20" y="40" width="96" height="170" rx="16" fill="#0F1420" stroke="#F97316" stroke-width="4"/>
+              <circle cx="68" cy="62" r="6" fill="#38BDF8"/>
+              <path d="M68 210v20M40 230h56" stroke="#2E3A50" stroke-width="6" stroke-linecap="round"/>
+              <path class="cam-beam" d="M120 70 L280 20 L280 230 L120 180Z" fill="#38BDF8" opacity="0.08"/>
+              <g stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.85">
+                <circle cx="230" cy="58" r="15" fill="#F8FAFC" stroke="none"/>
+                <path d="M230 76v62M230 92l-26 26M230 92l26 26M230 138l-18 52M230 138l18 52"/>
+              </g>
+              <rect class="scan" x="180" y="30" width="100" height="4" rx="2" fill="#38BDF8"/>
+            </svg>
+          </div>
+          <span class="h-num">01</span>
+          <h3>Point your camera</h3>
+          <p class="muted">Prop up your phone 2–3 m away. Each video frame goes straight to the AI model, on your phone.</p>
+        </article>
+
+        <article class="h-panel" id="p-points">
+          <div class="h-art">
+            <svg viewBox="0 0 320 240" aria-hidden="true">
+              <g class="bones" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round" fill="none">
+                <path d="M130 70h60"/><path d="M130 70l-18 46l-8 44"/><path d="M190 70l18 46l8 44"/>
+                <path d="M130 70l8 76M190 70l-8 76M138 146h44"/>
+                <path d="M138 146l-6 50l-4 34"/><path d="M182 146l6 50l4 34"/>
+              </g>
+              <g class="pts" fill="#F97316">
+                <circle cx="160" cy="38" r="16"/>
+                <circle cx="130" cy="70" r="7"/><circle cx="190" cy="70" r="7"/><circle cx="112" cy="116" r="7"/><circle cx="208" cy="116" r="7"/>
+                <circle cx="104" cy="160" r="7"/><circle cx="216" cy="160" r="7"/><circle cx="138" cy="146" r="7"/><circle cx="182" cy="146" r="7"/>
+                <circle cx="132" cy="196" r="7" fill="#22C55E"/><circle cx="188" cy="196" r="7" fill="#22C55E"/><circle cx="128" cy="230" r="7"/><circle cx="192" cy="230" r="7"/>
+              </g>
+            </svg>
+          </div>
+          <span class="h-num">02</span>
+          <h3>AI finds 33 points</h3>
+          <p class="muted">A neural network trained on many labelled photos of people predicts where your joints are, many times a second.</p>
+        </article>
+
+        <article class="h-panel" id="p-angle">
+          <div class="h-art">
+            <svg viewBox="0 0 320 240" aria-hidden="true">
+              <g stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" fill="none"><path d="M90 60 L180 130 L150 220"/></g>
+              <circle cx="90" cy="60" r="9" fill="#F97316"/><circle cx="180" cy="130" r="12" fill="#22C55E"/><circle cx="150" cy="220" r="9" fill="#F97316"/>
+              <path class="arc" d="M152 108 A36 36 0 0 0 168 164" stroke="#22C55E" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <rect x="196" y="110" width="104" height="44" rx="12" fill="#0F1420" stroke="#22C55E" stroke-width="2"/>
+              <text x="248" y="141" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="26" fill="#86EFAC"><tspan class="angle-num">92</tspan>°</text>
+            </svg>
+          </div>
+          <span class="h-num">03</span>
+          <h3>Measure the angles</h3>
+          <p class="muted">Our code turns the points into joint angles. Knee below 100°? That's full depth. Back up past 160°? One rep.</p>
+        </article>
+
+        <article class="h-panel" id="p-voice">
+          <div class="h-art">
+            <svg viewBox="0 0 320 240" aria-hidden="true">
+              <rect x="40" y="30" width="110" height="190" rx="18" fill="#0F1420" stroke="#2E3A50" stroke-width="4"/>
+              <text x="95" y="120" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="64" fill="#F97316" class="rep-num">8</text>
+              <text x="95" y="146" text-anchor="middle" font-family="Barlow, sans-serif" font-size="13" fill="#B6C2D4" letter-spacing="2">REPS</text>
+              <g class="bubble">
+                <path d="M168 60h124a14 14 0 0 1 14 14v52a14 14 0 0 1-14 14h-90l-22 20v-20h-12a14 14 0 0 1-14-14V74a14 14 0 0 1 14-14z" fill="#22C55E"/>
+                <text x="230" y="98" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="22" fill="#0F172A">GOOD FORM!</text>
+                <text x="230" y="122" text-anchor="middle" font-family="Barlow, sans-serif" font-weight="600" font-size="14" fill="#0F172A">Keep your chest up</text>
+              </g>
+              <g stroke="#38BDF8" stroke-width="4" stroke-linecap="round" fill="none" class="waves"><path d="M180 190q10 -14 0 -28"/><path d="M196 198q18 -22 0 -44"/><path d="M212 206q26 -30 0 -60"/></g>
+            </svg>
+          </div>
+          <span class="h-num">04</span>
+          <h3>Coach in real time</h3>
+          <p class="muted">You get the rep count, form tips by voice, rest timers, and a heat limit that stops you before it gets unsafe.</p>
+        </article>
       </div>
     </div>
   </section>
 
-  <section class="section-tight">
+  <!-- ───────── SCREENS ───────── -->
+  <section class="section screens" id="screens">
     <div class="wrap">
-      <div class="card" style="display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;justify-content:space-between">
-        <div style="max-width:60ch">
-          <h3>Private by design</h3>
-          <p class="muted" style="margin:0">The AI model runs inside your browser. Camera images are analysed on your device and are never uploaded, saved or shared.</p>
-        </div>
-        <a class="btn btn-ghost" href="team.html">Meet the team</a>
+      <span class="eyebrow">See the app</span>
+      <h2>Three tools in one website</h2>
+      <div class="phones">
+        <a class="phone-card" href="heat.html" data-speed="40">
+          <div class="phone"><img src="assets/shots/heat.jpg" alt="Screenshot of the Heat check page showing a heat index and a safe workout plan" width="585" height="996" loading="lazy"></div>
+          <h3>Heat check</h3><p class="muted small">Live Manama weather → safe plan</p>
+        </a>
+        <a class="phone-card" href="coach.html" data-speed="-30">
+          <div class="phone"><img src="assets/shots/coach.jpg" alt="Illustration of the AI coach screen counting squats" width="585" height="996" loading="lazy"></div>
+          <h3>AI coach</h3><p class="muted small">Reps, form and voice feedback</p>
+        </a>
+        <a class="phone-card" href="lab.html" data-speed="70">
+          <div class="phone"><img src="assets/shots/lab.jpg" alt="Screenshot of the Test Lab page where user tests are logged" width="585" height="996" loading="lazy"></div>
+          <h3>Test lab</h3><p class="muted small">Real user tests → real accuracy</p>
+        </a>
       </div>
+    </div>
+  </section>
+
+  <!-- ───────── NUMBERS ───────── -->
+  <section class="section-tight numbers">
+    <div class="wrap num-grid">
+      <div class="num-tile"><span class="big" data-count="33">33</span><span class="k">body points tracked per frame</span></div>
+      <div class="num-tile"><span class="big" data-count="6" data-suffix=" MB">6 MB</span><span class="k">AI model, small enough for a phone</span></div>
+      <div class="num-tile"><span class="big" data-count="0">0</span><span class="k">videos uploaded, ever</span></div>
+      <div class="num-tile"><span class="big" data-count="3">3</span><span class="k">exercises with form checks</span></div>
+    </div>
+  </section>
+
+  <!-- ───────── CTA ───────── -->
+  <section class="cta-band" id="cta">
+    <svg class="cta-scene" viewBox="0 0 1440 420" aria-hidden="true">
+      <circle class="cta-sun" cx="1040" cy="200" r="70" fill="#FDBA74"/>
+      <path d="M0 420V330h60v-40h40v60h50v-90h40v90h70v-50h60v70h40v-110h50v110h60v-60h50v60h40v-30h80v50h60v-140l50-24v164h40V240l60-28v208h60v-90h50v-60h40v150h70v-70h60v90h40v-50h60v70h50v-30h80v60z" fill="#0F1420"/>
+    </svg>
+    <div class="wrap cta-inner">
+      <h2>Ready to train smart?</h2>
+      <p class="lead">Check the heat, prop up your phone, and let the AI coach count every rep.</p>
+      <div class="btn-row" style="justify-content:center">
+        <a class="btn btn-primary btn-lg" href="coach.html">Start the AI coach</a>
+        <a class="btn btn-ghost btn-lg" href="how.html">How the AI works</a>
+      </div>
+      <p class="small" style="margin-top:1.25rem;opacity:0.85">Private by design: the AI runs inside your browser and camera images never leave your device.</p>
     </div>
   </section>
 </main>
-<script type="module">
-  import { initPage } from './js/ui.js';
-  import { ready } from './js/motion.js';
-  initPage();
-
-  // Hero demo: the figure does 3 squats while the "AI" reads its knee angle.
-  const $ = (id) => document.getElementById(id);
-  const ANKLE = { x: 175, y: 360 };
-  const rad = (d) => (d * Math.PI) / 180;
-  const at = (p, len, deg, down = false) => ({ x: p.x + len * Math.sin(rad(deg)), y: p.y + (down ? 1 : -1) * len * Math.cos(rad(deg)) });
-  const GREEN = '#22C55E', ORANGE = '#F97316', BLUE = '#38BDF8';
-
-  function pose(knee) {
-    const bend = 170 - knee;                       // 0 standing … ~80 deep
-    const shin = 4 + bend * 0.4;                   // shin leans forward
-    const thigh = 180 - knee - shin;               // thigh leans back
-    const k = at(ANKLE, 80, shin);
-    const h = at(k, 80, -thigh);
-    const lean = 10 + bend * 0.45;                 // chest leans forward as you go down
-    const sh = at(h, 75, lean);
-    const head = at(sh, 30, lean - 8);
-    const arm = 15 + (bend / 80) * 75;             // arms swing forward for balance
-    const el = at(sh, 45, arm, true);
-    const wr = at(el, 45, arm - 6, true);
-    const P = (p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
-    $('fig-body').setAttribute('d', `M${P(sh)} L${P(h)}`);
-    $('fig-arm').setAttribute('d', `M${P(sh)} L${P(el)} L${P(wr)}`);
-    $('fig-leg').setAttribute('d', `M${P(h)} L${P(k)} L${P(ANKLE)} L${ANKLE.x + 30} ${ANKLE.y + 2}`);
-    const dot = (id, p) => { $(id).setAttribute('cx', p.x.toFixed(1)); $(id).setAttribute('cy', p.y.toFixed(1)); };
-    dot('d-head', head); dot('d-sh', sh); dot('d-el', el); dot('d-wr', wr); dot('d-hip', h); dot('d-an', ANKLE); dot('d-knee', k);
-    const deep = knee <= 100;
-    $('d-knee').setAttribute('fill', deep ? GREEN : ORANGE);
-    $('knee-box').setAttribute('x', (k.x + 18).toFixed(1));
-    $('knee-box').setAttribute('y', (k.y - 18).toFixed(1));
-    $('knee-box').setAttribute('stroke', deep ? GREEN : ORANGE);
-    $('knee-text').setAttribute('x', (k.x + 64).toFixed(1));
-    $('knee-text').setAttribute('y', (k.y + 7).toFixed(1));
-    $('knee-text').setAttribute('fill', deep ? '#86EFAC' : '#FDBA74');
-    $('knee-text').textContent = `KNEE ${Math.round(knee)}°`;
-  }
-  function cue(text, color) {
-    $('cue-text').textContent = text;
-    $('cue-box').setAttribute('stroke', color);
-    $('cue-text').setAttribute('fill', color === GREEN ? '#86EFAC' : color === BLUE ? '#BAE6FD' : '#FDBA74');
-  }
-
-  pose(92); // static frame (also what reduced-motion users see)
-
-  ready().then((gsap) => {
-    if (!gsap) return;
-    const s = { knee: 170 };
-    let reps = 0;
-    pose(170); cue('READY', BLUE);
-    const tl = gsap.timeline({ delay: 0.9, onUpdate: () => pose(s.knee) });
-    for (let i = 0; i < 3; i++) {
-      tl.call(() => cue('GOING DOWN…', ORANGE))
-        .to(s, { knee: 88, duration: 1.0, ease: 'power1.inOut' })
-        .call(() => cue('GOOD DEPTH · DRIVE UP!', GREEN))
-        .to(s, { knee: 88, duration: 0.2 })
-        .to(s, { knee: 170, duration: 0.85, ease: 'power2.out' })
-        .call(() => { reps++; cue(`REP ${reps} · GOOD FORM`, GREEN); gsap.fromTo('#cue-box', { opacity: 0.4 }, { opacity: 1, duration: 0.3 }); })
-        .to(s, { knee: 170, duration: 0.5 });
-    }
-    tl.call(() => cue('3 REPS · ALL GOOD FORM', GREEN));
-  });
-</script>
+<script type="module" src="js/home.js"></script>
 </body>
 </html>

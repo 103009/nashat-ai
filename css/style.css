@@ -1,3 +1,4 @@
+@import url("fonts.css");
 /* Nashat — design tokens */
 :root {
   --bg: #0F1420;
@@ -308,7 +309,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: no-preference) {
   .js-motion .intro,
   .js-motion [data-split],
-  .js-motion main :is(.grid, .pipeline, .exercise-pick) > * {
+  .js-motion main :is(.grid, .pipeline, .exercise-pick, .split) > *,
+  .js-motion .page-art {
     opacity: 0;
     animation: motion-fallback 0.3s 3s forwards;
   }
@@ -317,3 +319,13 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 [data-split] { perspective: 600px; }
 .exercise-pick button:hover { transform: translateY(-2px); }
 .hours .bar, .chart-fill { will-change: auto; }
+
+/* page header with illustration */
+.page-head { display: grid; grid-template-columns: 1fr minmax(220px, 340px); gap: 2rem; align-items: center; margin-bottom: 1.5rem; }
+.page-head-text > :last-child { margin-bottom: 0; }
+.page-art { border-radius: 22px; background: radial-gradient(circle at 70% 25%, rgba(249, 115, 22, 0.18), transparent 60%), var(--card); border: 1px solid var(--border); overflow: hidden; aspect-ratio: 340 / 220; }
+.page-art svg { width: 100%; height: 100%; }
+@media (max-width: 700px) {
+  .page-head { grid-template-columns: 1fr; gap: 1rem; }
+  .page-art { order: -1; max-height: 170px; aspect-ratio: auto; height: 170px; }
+}

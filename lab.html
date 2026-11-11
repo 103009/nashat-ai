@@ -6,18 +6,32 @@
   <title>Test lab — Nashat</title>
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
   <script>document.documentElement.classList.add('js-motion')</script>
 </head>
 <body>
 <main id="main" class="section">
   <div class="wrap">
-    <span class="eyebrow intro">Testing with real users</span>
+    <div class="page-head">
+      <div class="page-head-text">
+        <span class="eyebrow intro">Testing with real users</span>
     <h1 class="intro">Test lab</h1>
     <p class="muted intro" style="max-width:66ch">How to test: a volunteer does a set with the AI coach in <em>Free count</em> mode while a team member counts the reps by hand. Log both numbers here. Nashat then works out how accurate the AI is. Tests are saved only on this device, so use <strong>Export</strong> to keep a copy.</p>
+      </div>
+      <div class="page-art"><svg viewBox="0 0 340 220" aria-hidden="true">
+  <path class="draw" d="M30 200h290" stroke="#2E3A50" stroke-width="3"/>
+  <g fill="#F97316"><rect class="grow" x="50" y="120" width="34" height="80" rx="6"/><rect class="grow" x="100" y="90" width="34" height="110" rx="6"/><rect class="grow" x="150" y="60" width="34" height="140" rx="6" fill="#22C55E"/></g>
+  <path class="draw" d="M48 112L98 82L148 50" stroke="#F8FAFC" stroke-width="3" fill="none" stroke-dasharray="6 6"/>
+  <g transform="translate(220 40)">
+    <path class="draw" d="M30 0h40M38 0v50L4 128a10 10 0 0 0 9 14h74a10 10 0 0 0 9-14L62 50V0" stroke="#F8FAFC" stroke-width="5" fill="none" stroke-linejoin="round"/>
+    <path class="pop" d="M14 112h72l12 22a6 6 0 0 1-5 8H7a6 6 0 0 1-5-8z" fill="#38BDF8" opacity="0.8"/>
+    <circle class="pop" cx="40" cy="98" r="6" fill="#38BDF8"/><circle class="pop" cx="58" cy="84" r="4" fill="#38BDF8"/>
+  </g>
+  <circle class="pop" cx="167" cy="36" r="16" fill="#22C55E"/>
+  <path class="draw" d="M159 36l6 6l10-12" stroke="#0F172A" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg></div>
+    </div>
 
     <section class="grid stats-grid" id="stats" style="margin:1.5rem 0" aria-label="Summary"></section>
 

@@ -7,7 +7,7 @@
 //
 // GSAP © GreenSock, Standard "no charge" licence — https://gsap.com/standard-license
 
-const SCRIPTS = ['gsap.min.js', 'ScrollTrigger.min.js', 'SplitText.min.js'];
+const SCRIPTS = ['gsap.min.js', 'ScrollTrigger.min.js', 'SplitText.min.js', 'DrawSVGPlugin.min.js'];
 const base = new URL('../vendor/gsap/', import.meta.url);
 let gsapPromise = null;
 
@@ -30,8 +30,8 @@ export function ready() {
       if (reducedMotion()) return null;
       try {
         for (const f of SCRIPTS) if (!window[f.replace('.min.js', '')]) await loadScript(new URL(f, base).href);
-        const { gsap, ScrollTrigger, SplitText } = window;
-        gsap.registerPlugin(ScrollTrigger, SplitText);
+        const { gsap, ScrollTrigger, SplitText, DrawSVGPlugin } = window;
+        gsap.registerPlugin(ScrollTrigger, SplitText, DrawSVGPlugin);
         gsap.defaults({ ease: 'power2.out', duration: 0.5 });
         return gsap;
       } catch (e) {
@@ -57,10 +57,28 @@ export async function autoAnimate() {
   gsap.set(intro, { opacity: 0, y: 24 });
 
   // Scroll reveal for card groups (Standard preset)
-  const groups = [...document.querySelectorAll('main :is(.grid, .pipeline, .exercise-pick)')];
+  const groups = [...document.querySelectorAll('main :is(.grid, .pipeline, .exercise-pick, .split)')];
   for (const g of groups) gsap.set([...g.children].slice(0, 8), { opacity: 0, y: 24 });
 
+  // Page illustrations: lines draw themselves, shapes pop in, bars grow (DrawSVG plugin)
+  const arts = [...document.querySelectorAll('.page-art')];
+  const artTl = gsap.timeline({ delay: 0.15 });
+  for (const art of arts) {
+    artTl.fromTo(art, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.5, clearProps: 'transform' }, 0)
+      .fromTo(art.querySelectorAll('.draw'), { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.9, stagger: 0.06, ease: 'power2.out' }, 0.15)
+      .fromTo(art.querySelectorAll('.grow'), { scaleY: 0, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' }, 0.3)
+      .fromTo(art.querySelectorAll('.pop'), { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.45, stagger: 0.06, ease: 'back.out(2.5)' }, 0.35);
+  }
+
   unhide(); // everything above is now hidden by GSAP itself, so the CSS pre-hide can go
+
+  // Illustrations drift up more slowly than the page as you scroll (parallax, scrubbed)
+  for (const art of arts) {
+    gsap.to(art.querySelector('svg'), {
+      yPercent: 18, ease: 'none',
+      scrollTrigger: { trigger: art, start: 'top 80px', end: 'bottom top', scrub: true },
+    });
+  }
 
   const tl = gsap.timeline();
   tl.to(intro, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, clearProps: 'transform' });
