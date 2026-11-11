@@ -74,6 +74,8 @@ export function initPage() {
       <p class="muted">Nashat gives general fitness guidance, not medical advice. Camera video is processed on your device and never uploaded. · v${CONFIG.appVersion}</p>
     </div>`;
   document.body.append(footer);
+
+  import('./motion.js').then((m) => m.autoAnimate()).catch(() => document.documentElement.classList.remove('js-motion'));
 }
 
 // ── voice coaching ──

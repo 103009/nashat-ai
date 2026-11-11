@@ -64,7 +64,8 @@ js/coach.js      the coach page: sets, rest, timers, voice, summary
 js/lab.js        test logging, accuracy maths, CSV export, tuning sliders
 js/store.js      saves data in the browser (localStorage); default AI-rule settings
 js/ui.js         navigation, footer, voice, small helpers
-vendor/          MediaPipe runtime (Apache 2.0) + QR generator (MIT), served locally
+js/motion.js     animations (GSAP): page intro, scroll reveals, count-ups, rep pop
+vendor/          MediaPipe runtime (Apache 2.0), GSAP (GreenSock standard licence), QR generator (MIT)
 models/          pose_landmarker_lite.task: the trained AI model (about 6 MB)
 ```
 
@@ -74,5 +75,5 @@ CDNs at the symposium. Only the live weather button and the Google font need int
 ## Credits
 
 MediaPipe Pose Landmarker © Google (Apache 2.0) · Open-Meteo weather (CC BY 4.0) ·
-qrcode-generator © Kazuhiko Arase (MIT) · Barlow fonts (SIL OFL) · Lucide-style icons (ISC).
+qrcode-generator © Kazuhiko Arase (MIT) · GSAP © GreenSock (standard no-charge licence) · Barlow fonts (SIL OFL) · Lucide-style icons (ISC).
 Built with coding help from Claude (Anthropic), as the symposium rules allow.

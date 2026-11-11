@@ -3,6 +3,7 @@ import { loadPoseModel, startCamera, startFile, stopVideo, runLoop, drawSkeleton
 import { createAnalyzer, EXERCISES, CUES } from './exercises.js';
 import { DEFAULT_PLAN } from './heat.js';
 import { load, save, getSettings, saveSettings } from './store.js';
+import { pop, nudge } from './motion.js';
 
 initPage();
 
@@ -63,7 +64,7 @@ refreshVoice();
 // ── UI helpers ──
 function setCue(msg, level = 'info') {
   const c = $('#cue');
-  if (c.textContent !== msg) c.textContent = msg;
+  if (c.textContent !== msg) { c.textContent = msg; if (msg) nudge(c); }
   c.className = `cue ${level}`;
 }
 function flash(kind) {
@@ -152,6 +153,7 @@ function endSession(showSummary = true, reason = '') {
       ? '<strong>Work on:</strong> ' + f.map(([k, v]) => `${esc(k)} (${v}×)`).join(', ')
       : (t.reps ? '<strong>Great form on every counted rep!</strong>' : '');
     $('#summary').classList.remove('hidden');
+    nudge($('#summary'));
     save('lastSession', result);
     const hist = load('sessions', []); hist.unshift(result); save('sessions', hist.slice(0, 50));
     if (reason) speak(reason, { force: true });
@@ -209,6 +211,7 @@ function onFrame(lm, { aspect, t }) {
 
   if (r.event === 'rep') {
     flash(r.repGood ? 'good' : 'warn');
+    pop($('#c-reps').closest('.tile'), 1.12);
     if (r.repGood) { setCue(`Rep ${r.reps}: good form`, 'good'); speak(String(r.reps)); }
     else { setCue(`Rep ${r.reps}: ${CUES[r.faults[0]]}`, 'warn'); speak(`${r.reps}. ${CUES[r.faults[0]]}`); }
     if (r.reps >= session.target) {

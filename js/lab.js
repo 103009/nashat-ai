@@ -2,6 +2,7 @@ import { initPage, $, $$, esc, toast } from './ui.js';
 import { load, save, remove, getSettings, saveSettings, DEFAULT_SETTINGS } from './store.js';
 import { CONFIG } from './config.js';
 import { EXERCISES } from './exercises.js';
+import { growBars, pop } from './motion.js';
 
 initPage();
 
@@ -91,7 +92,10 @@ function renderTable() {
   }).join('');
 }
 
-function renderAll() { renderStats(); renderCharts(); renderTable(); }
+function renderAll() {
+  renderStats(); renderCharts(); renderTable();
+  growBars([...document.querySelectorAll('.chart-fill')], 'x');
+}
 
 $('#tests-body').addEventListener('click', (e) => {
   const b = e.target.closest('[data-del]');
@@ -153,6 +157,7 @@ $('#test-form').addEventListener('submit', (e) => {
   renderAll();
   resetForm();
   toast('Test saved.', 'good');
+  pop(document.querySelector('#stats .stat'), 1.08);
 });
 
 // ── export / import ──

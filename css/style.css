@@ -302,3 +302,18 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .stats-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
 @media (min-width: 1000px) { .stats-grid { grid-template-columns: repeat(6, 1fr); } }
 @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+/* Motion: hide animated elements until GSAP takes over (only if the user allows motion).
+   Safety net: if the script never runs, they appear after 3s anyway. */
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion .intro,
+  .js-motion [data-split],
+  .js-motion main :is(.grid, .pipeline, .exercise-pick) > * {
+    opacity: 0;
+    animation: motion-fallback 0.3s 3s forwards;
+  }
+}
+@keyframes motion-fallback { to { opacity: 1; } }
+[data-split] { perspective: 600px; }
+.exercise-pick button:hover { transform: translateY(-2px); }
+.hours .bar, .chart-fill { will-change: auto; }

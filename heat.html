@@ -10,13 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add('js-motion')</script>
 </head>
 <body>
 <main id="main" class="section">
   <div class="wrap">
-    <span class="eyebrow">Step 1</span>
-    <h1>Heat check</h1>
-    <p class="muted" style="max-width:62ch">Heat plus humidity is more dangerous than temperature alone, because sweat can't cool you down. Nashat works out the <strong>heat index</strong> ("feels like" temperature) and adjusts your workout to match.</p>
+    <span class="eyebrow intro">Step 1</span>
+    <h1 class="intro">Heat check</h1>
+    <p class="muted intro" style="max-width:62ch">Heat plus humidity is more dangerous than temperature alone, because sweat can't cool you down. Nashat works out the <strong>heat index</strong> ("feels like" temperature) and adjusts your workout to match.</p>
 
     <div class="split">
       <form class="card" id="heat-form" novalidate>
@@ -95,6 +96,7 @@
   import { initPage, $, esc } from './js/ui.js';
   import { makePlan, fetchWeather, bestHour, LEVELS } from './js/heat.js';
   import { save, load } from './js/store.js';
+  import { countUp, growBars, nudge } from './js/motion.js';
   initPage();
 
   const form = $('#heat-form');
@@ -107,16 +109,17 @@
   $('#scale').innerHTML = LEVELS.map((l) => `<div style="background:${l.color}"></div>`).join('');
 
   function render(plan) {
-    $('#hi-num').textContent = plan.heatIndexC.toFixed(0);
+    countUp($('#hi-num'), Math.round(plan.heatIndexC));
     const lvl = $('#hi-level');
     lvl.textContent = plan.level.name;
     lvl.style.background = plan.level.color;
     $('#result').style.borderColor = plan.level.color;
     [...$('#scale').children].forEach((d, i) => d.classList.toggle('on', i === plan.level.id));
-    $('#p-sets').textContent = plan.sets;
-    $('#p-reps').textContent = plan.reps;
-    $('#p-rest').textContent = plan.restSec;
-    $('#p-max').textContent = plan.maxMinutes;
+    countUp($('#p-sets'), plan.sets, { duration: 0.5 });
+    countUp($('#p-reps'), plan.reps, { duration: 0.5 });
+    countUp($('#p-rest'), plan.restSec, { duration: 0.5 });
+    countUp($('#p-max'), plan.maxMinutes, { duration: 0.5 });
+    nudge($('#hi-level'));
     $('#p-place').textContent = plan.place;
     $('#p-water').textContent = plan.waterEveryMin ? `a few sips every ${plan.waterEveryMin} minutes` : 'not possible while fasting, so keep the session short and light';
     $('#p-tips').innerHTML = plan.tips.map((t) => `<li>${esc(t)}</li>`).join('');
@@ -159,6 +162,7 @@
     $('#hours-table').innerHTML = hours.map((h) => `<tr><td>${h.time.replace('T', ' ')}</td><td class="num">${h.tempC.toFixed(1)}</td><td class="num">${h.rh}</td><td class="num">${h.hi.toFixed(1)}</td><td>${h.level.name}</td></tr>`).join('');
     $('#best-text').innerHTML = `Best time to train today (05:00–22:00): <strong>${hh(best.time)}</strong>, heat index about <strong>${best.hi.toFixed(0)} °C</strong> (${best.level.name}).`;
     $('#forecast-card').hidden = false;
+    growBars([...document.querySelectorAll('#hours .bar')], 'y');
   }
 
   $('#live-btn').addEventListener('click', async () => {

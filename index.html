@@ -11,20 +11,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add('js-motion')</script>
 </head>
 <body>
 <main id="main">
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">AI Symposium 2027 · Sport</span>
-        <h1>Train smart.<br><span>Beat the heat.</span></h1>
-        <p class="lead">Nashat is an AI coach in your browser. It watches your movement through the camera, counts your reps, corrects your form, and plans a workout that is safe for today's Bahrain weather.</p>
-        <div class="btn-row">
+        <span class="eyebrow intro">AI Symposium 2027 · Sport</span>
+        <h1 data-split>Train smart.<br><span>Beat the heat.</span></h1>
+        <p class="lead intro">Nashat is an AI coach in your browser. It watches your movement through the camera, counts your reps, corrects your form, and plans a workout that is safe for today's Bahrain weather.</p>
+        <div class="btn-row intro">
           <a class="btn btn-primary btn-lg" href="coach.html" id="cta-coach">Try the AI coach <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
           <a class="btn btn-ghost btn-lg" href="heat.html">Check today's heat</a>
         </div>
-        <p class="small muted" style="margin-top:1rem">No sign-up. No download. Your video never leaves your phone.</p>
+        <p class="small muted intro" style="margin-top:1rem">No sign-up. No download. Your video never leaves your phone.</p>
       </div>
       <div class="hero-visual" aria-hidden="true">
         <!-- Illustration: a skeleton figure in a squat, like the AI sees it -->
@@ -39,24 +40,24 @@
           <g stroke="#2E3A50" stroke-width="1">
             <path d="M0 420H400M0 380H400M0 340H400M0 300H400"/>
           </g>
-          <g stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.92">
-            <path d="M180 170 L200 240"/>              <!-- torso -->
-            <path d="M180 170 L235 200 L280 205"/>     <!-- arm -->
-            <path d="M200 240 L265 285 L240 360"/>     <!-- leg -->
-            <path d="M240 360 L270 362"/>
+          <g id="fig" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.92">
+            <path id="fig-body" d="M180 170 L200 240"/>
+            <path id="fig-arm" d="M180 170 L235 200 L280 205"/>
+            <path id="fig-leg" d="M200 240 L265 285 L240 360 L270 362"/>
           </g>
-          <g fill="#F97316">
-            <circle cx="170" cy="140" r="20"/>
-            <circle cx="180" cy="170" r="8"/><circle cx="235" cy="200" r="8"/><circle cx="280" cy="205" r="8"/>
-            <circle cx="200" cy="240" r="8"/><circle cx="240" cy="360" r="8"/>
+          <g id="fig-dots" fill="#F97316">
+            <circle id="d-head" cx="170" cy="140" r="20"/>
+            <circle id="d-sh" cx="180" cy="170" r="8"/><circle id="d-el" cx="235" cy="200" r="8"/><circle id="d-wr" cx="280" cy="205" r="8"/>
+            <circle id="d-hip" cx="200" cy="240" r="8"/><circle id="d-an" cx="240" cy="360" r="8"/>
           </g>
-          <circle cx="265" cy="285" r="11" fill="#22C55E"/>
-          <path d="M248 270 A26 26 0 0 0 252 306" stroke="#22C55E" stroke-width="3" fill="none"/>
+          <circle id="d-knee" cx="265" cy="285" r="11" fill="#22C55E"/>
           <g font-family="Barlow Condensed, sans-serif" font-weight="700">
-            <rect x="282" y="268" rx="10" width="92" height="36" fill="#0F1420" stroke="#22C55E"/>
-            <text x="328" y="293" fill="#86EFAC" font-size="22" text-anchor="middle">KNEE 92°</text>
-            <rect x="30" y="430" rx="12" width="340" height="48" fill="#0F1420" stroke="#22C55E" stroke-width="2"/>
-            <text x="200" y="462" fill="#86EFAC" font-size="24" text-anchor="middle">GOOD DEPTH · REP 7</text>
+            <g id="knee-tag">
+              <rect id="knee-box" x="282" y="268" rx="10" width="92" height="36" fill="#0F1420" stroke="#22C55E"/>
+              <text id="knee-text" x="328" y="293" fill="#86EFAC" font-size="22" text-anchor="middle">KNEE 92°</text>
+            </g>
+            <rect id="cue-box" x="30" y="430" rx="12" width="340" height="48" fill="#0F1420" stroke="#22C55E" stroke-width="2"/>
+            <text id="cue-text" x="200" y="462" fill="#86EFAC" font-size="24" text-anchor="middle">GOOD DEPTH · REP 7</text>
           </g>
         </svg>
       </div>
@@ -123,7 +124,69 @@
 </main>
 <script type="module">
   import { initPage } from './js/ui.js';
+  import { ready } from './js/motion.js';
   initPage();
+
+  // Hero demo: the figure does 3 squats while the "AI" reads its knee angle.
+  const $ = (id) => document.getElementById(id);
+  const ANKLE = { x: 175, y: 360 };
+  const rad = (d) => (d * Math.PI) / 180;
+  const at = (p, len, deg, down = false) => ({ x: p.x + len * Math.sin(rad(deg)), y: p.y + (down ? 1 : -1) * len * Math.cos(rad(deg)) });
+  const GREEN = '#22C55E', ORANGE = '#F97316', BLUE = '#38BDF8';
+
+  function pose(knee) {
+    const bend = 170 - knee;                       // 0 standing … ~80 deep
+    const shin = 4 + bend * 0.4;                   // shin leans forward
+    const thigh = 180 - knee - shin;               // thigh leans back
+    const k = at(ANKLE, 80, shin);
+    const h = at(k, 80, -thigh);
+    const lean = 10 + bend * 0.45;                 // chest leans forward as you go down
+    const sh = at(h, 75, lean);
+    const head = at(sh, 30, lean - 8);
+    const arm = 15 + (bend / 80) * 75;             // arms swing forward for balance
+    const el = at(sh, 45, arm, true);
+    const wr = at(el, 45, arm - 6, true);
+    const P = (p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+    $('fig-body').setAttribute('d', `M${P(sh)} L${P(h)}`);
+    $('fig-arm').setAttribute('d', `M${P(sh)} L${P(el)} L${P(wr)}`);
+    $('fig-leg').setAttribute('d', `M${P(h)} L${P(k)} L${P(ANKLE)} L${ANKLE.x + 30} ${ANKLE.y + 2}`);
+    const dot = (id, p) => { $(id).setAttribute('cx', p.x.toFixed(1)); $(id).setAttribute('cy', p.y.toFixed(1)); };
+    dot('d-head', head); dot('d-sh', sh); dot('d-el', el); dot('d-wr', wr); dot('d-hip', h); dot('d-an', ANKLE); dot('d-knee', k);
+    const deep = knee <= 100;
+    $('d-knee').setAttribute('fill', deep ? GREEN : ORANGE);
+    $('knee-box').setAttribute('x', (k.x + 18).toFixed(1));
+    $('knee-box').setAttribute('y', (k.y - 18).toFixed(1));
+    $('knee-box').setAttribute('stroke', deep ? GREEN : ORANGE);
+    $('knee-text').setAttribute('x', (k.x + 64).toFixed(1));
+    $('knee-text').setAttribute('y', (k.y + 7).toFixed(1));
+    $('knee-text').setAttribute('fill', deep ? '#86EFAC' : '#FDBA74');
+    $('knee-text').textContent = `KNEE ${Math.round(knee)}°`;
+  }
+  function cue(text, color) {
+    $('cue-text').textContent = text;
+    $('cue-box').setAttribute('stroke', color);
+    $('cue-text').setAttribute('fill', color === GREEN ? '#86EFAC' : color === BLUE ? '#BAE6FD' : '#FDBA74');
+  }
+
+  pose(92); // static frame (also what reduced-motion users see)
+
+  ready().then((gsap) => {
+    if (!gsap) return;
+    const s = { knee: 170 };
+    let reps = 0;
+    pose(170); cue('READY', BLUE);
+    const tl = gsap.timeline({ delay: 0.9, onUpdate: () => pose(s.knee) });
+    for (let i = 0; i < 3; i++) {
+      tl.call(() => cue('GOING DOWN…', ORANGE))
+        .to(s, { knee: 88, duration: 1.0, ease: 'power1.inOut' })
+        .call(() => cue('GOOD DEPTH · DRIVE UP!', GREEN))
+        .to(s, { knee: 88, duration: 0.2 })
+        .to(s, { knee: 170, duration: 0.85, ease: 'power2.out' })
+        .call(() => { reps++; cue(`REP ${reps} · GOOD FORM`, GREEN); gsap.fromTo('#cue-box', { opacity: 0.4 }, { opacity: 1, duration: 0.3 }); })
+        .to(s, { knee: 170, duration: 0.5 });
+    }
+    tl.call(() => cue('3 REPS · ALL GOOD FORM', GREEN));
+  });
 </script>
 </body>
 </html>
