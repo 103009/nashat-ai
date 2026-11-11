@@ -83,6 +83,18 @@ CDNs at the symposium. Only the live weather button needs internet; fonts and an
 - They follow the computer's "reduce motion" setting. Visitors can override it with the **Motion** switch in the header
   (the choice is remembered). If Windows "Animation effects" is off, the site shows a notice with a "Turn on animations" button.
 
+## Rep counting
+
+Each frame becomes a depth score from 0 (start position) to 1 (bottom of a full rep), using the larger of
+several signals (knee/elbow angle, how far the hips or shoulders drop, thigh tilt), so it works facing the
+camera or side-on and when the feet are out of frame. A rep is counted each time the score goes past 0.5
+and back below 0.2. Every rep counts; reps under 80% depth are marked "not deep enough".
+The start position is learned from each person. Check it with:
+
+```bash
+node tests/counting.test.mjs
+```
+
 ## If the AI coach won't start
 
 Open **Troubleshoot** on the AI coach page and press **Run system check**. It checks https, camera permission,

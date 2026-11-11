@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
   <link rel="modulepreload" href="vendor/mediapipe/vision_bundle.mjs">
 </head>
@@ -49,12 +49,10 @@
           </div>
           <div class="cue" id="cue" aria-live="polite"></div>
           <div class="rest-overlay" id="rest" aria-live="polite">
-            <div>
-              <p class="eyebrow" style="color:var(--info)">Rest. Sip water if you can</p>
-              <div class="num" id="rest-num">60</div>
-              <p class="muted">Next: set <span id="rest-next">2</span></p>
-              <button class="btn btn-ghost btn-sm" id="skip-rest" type="button" style="pointer-events:auto">Skip rest</button>
-            </div>
+            <span class="rest-label">Rest</span>
+            <span class="num" id="rest-num">60</span><span class="rest-unit">s</span>
+            <span class="muted small">Next: set <span id="rest-next">2</span> · reps still count</span>
+            <button class="btn btn-ghost btn-sm" id="skip-rest" type="button">Skip</button>
           </div>
         </div>
 
@@ -77,9 +75,9 @@
       <aside class="stack">
         <div class="card">
           <div class="counter">
-            <div class="tile big"><div class="v" id="c-reps">0</div><div class="k">Reps this set</div></div>
+            <div class="tile big"><div class="v" id="c-reps">0</div><div class="k" id="c-reps-label">Reps</div></div>
             <div class="tile"><div class="v" id="c-good">0</div><div class="k">Good form</div></div>
-            <div class="tile"><div class="v" id="c-total">0</div><div class="k">Total reps</div></div>
+            <div class="tile"><div class="v" id="c-total">0</div><div class="k" id="c-total-label">Not deep enough</div></div>
           </div>
           <div class="metrics" id="metrics" style="margin-top:0.75rem"></div>
         </div>
@@ -89,7 +87,7 @@
             <h3 style="margin:0">Today's plan</h3>
             <a class="small" href="heat.html">Change</a>
           </div>
-          <label class="switch" style="margin-top:0.5rem"><input type="checkbox" id="free-mode"> Free count (no sets, for testing)</label>
+          <label class="switch" style="margin-top:0.5rem"><input type="checkbox" id="plan-mode"> Follow today's heat plan (sets and rest breaks)</label>
           <p class="muted small" id="plan-text" style="margin:0.5rem 0 0"></p>
         </div>
 
@@ -98,7 +96,7 @@
           <div class="grid grid-2" style="grid-template-columns:1fr 1fr">
             <div class="stat"><div class="v" id="s-reps">0</div><div class="k">Reps counted</div></div>
             <div class="stat"><div class="v" id="s-form">0%</div><div class="k">Good form</div></div>
-            <div class="stat"><div class="v" id="s-partial">0</div><div class="k">Half reps (not counted)</div></div>
+            <div class="stat"><div class="v" id="s-partial">0</div><div class="k">Not deep enough (still counted)</div></div>
             <div class="stat"><div class="v" id="s-time">0:00</div><div class="k">Active time</div></div>
           </div>
           <p class="small" id="s-faults" style="margin-top:0.75rem"></p>
@@ -131,6 +129,6 @@
   </div>
 </main>
 
-<script type="module" src="js/coach.js?v=6"></script>
+<script type="module" src="js/coach.js?v=7"></script>
 </body>
 </html>

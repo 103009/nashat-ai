@@ -24,16 +24,14 @@ export function remove(key) {
 
 // Tunable AI-rule settings. Change them in the Test Lab after user testing.
 export const DEFAULT_SETTINGS = {
-  squatDownAngle: 100,      // knee angle (°) that counts as a full-depth squat
-  squatUpAngle: 160,        // knee angle (°) that counts as standing
-  squatPartialAngle: 130,   // went below this but not to depth → "go lower"
+  squatDownAngle: 100,      // knee angle (°) of a full-depth squat (side view)
   squatLeanMax: 50,         // max forward lean of the torso (°) at the bottom
   pushupDownAngle: 90,      // elbow angle (°) at the bottom of a push-up
-  pushupUpAngle: 150,       // elbow angle (°) at the top
   pushupBodyLineMin: 155,   // shoulder–hip–ankle angle (°) for a straight body
-  jackFeetRatio: 1.6,       // ankle gap ÷ shoulder width that counts as "feet apart"
+  jackFeetRatio: 1.5,       // ankle gap ÷ shoulder width that counts as "feet apart"
+  goodDepth: 0.8,           // how deep (0–1) a rep must go to count as good form
   minVisibility: 0.5,       // how sure the AI must be that a joint is visible (0–1)
-  smoothing: 0.5,           // 0 = no smoothing, 0.9 = very smooth but slower
+  smoothing: 0.35,          // 0 = no smoothing, 0.9 = very smooth but slower
   voice: true,
 };
 

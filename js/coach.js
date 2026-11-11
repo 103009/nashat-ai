@@ -19,11 +19,12 @@ let stopLoop = null;
 let session = null;
 
 // ── plan panel ──
+const planMode = () => $('#plan-mode').checked;
 function planText() {
-  if ($('#free-mode').checked) return 'Free count: the coach just counts reps with no set target. Use this when testing accuracy.';
+  const heat = `Heat index ${Math.round(plan.heatIndexC)} °C (${plan.level.name})${plan.fasting ? ', fasting mode' : ''}.`;
+  if (!planMode()) return `Just counting: every rep is counted, with no set limit. ${heat} Safe time today: about ${plan.maxMinutes} min.`;
   const water = plan.waterEveryMin ? `, water reminder every ${plan.waterEveryMin} min` : '';
-  return `${plan.sets} sets × ${plan.reps} reps, ${plan.restSec}s rest, max ${plan.maxMinutes} min${water}. ` +
-    `Heat index ${Math.round(plan.heatIndexC)} °C (${plan.level.name})${plan.fasting ? ', fasting mode' : ''}.`;
+  return `${plan.sets} sets × ${plan.reps} reps, ${plan.restSec}s rest, max ${plan.maxMinutes} min${water}. ${heat} Reps keep counting during rests.`;
 }
 function refreshPlan() {
   $('#plan-text').textContent = planText();
@@ -34,8 +35,12 @@ function refreshPlan() {
     warn.classList.remove('hidden');
   } else warn.classList.add('hidden');
 }
-$('#free-mode').checked = load('freeMode', false);
-$('#free-mode').addEventListener('change', () => { save('freeMode', $('#free-mode').checked); refreshPlan(); resetCounters(); });
+$('#plan-mode').checked = load('planMode', false);
+$('#plan-mode').addEventListener('change', () => {
+  save('planMode', planMode());
+  refreshPlan();
+  if (session) { endSession(false); beginSession(); } else resetCounters();
+});
 refreshPlan();
 
 // ── exercise picker ──
@@ -73,71 +78,68 @@ function flash(kind) {
   void f.offsetWidth;
   f.className = `rep-flash go-${kind}`;
 }
+function renderCounters(sum) {
+  const reps = sum?.reps ?? 0;
+  if (session?.planMode) {
+    const inSet = reps - session.setStartReps;
+    $('#c-reps').textContent = session.planDone ? reps : `${Math.min(inSet, 999)}/${plan.reps}`;
+    $('#c-reps-label').textContent = session.planDone ? 'Total reps (plan done)' : `Set ${session.set} of ${plan.sets} · total ${reps}`;
+  } else {
+    $('#c-reps').textContent = reps;
+    $('#c-reps-label').textContent = 'Reps';
+  }
+  $('#c-good').textContent = sum?.goodReps ?? 0;
+  $('#c-total').textContent = sum?.partials ?? 0;
+}
 function resetCounters() {
-  $('#c-reps').textContent = '0'; $('#c-good').textContent = '0'; $('#c-total').textContent = '0';
-  $('#hud-set').textContent = $('#free-mode').checked ? 'Free count' : `Set 1/${plan.sets}`;
+  renderCounters(null);
+  $('#c-reps-label').textContent = planMode() ? `Set 1 of ${plan.sets}` : 'Reps';
+  $('#hud-set').textContent = planMode() ? `Set 1/${plan.sets}` : 'Counting';
 }
 function status(msg) { $('#status').textContent = msg; }
+const fmtMetric = (k, v) => (v === null || v === undefined || !Number.isFinite(v) ? '–'
+  : /angle|lean|line/i.test(k) ? Math.round(v) + '°' : k === 'Depth' ? Math.round(v * 100) + '%' : v.toFixed(2));
 
 // ── session ──
+// One analyser for the whole session. Sets and rests in plan mode are only
+// prompts: counting NEVER pauses, so every rep you do is counted.
 function beginSession() {
-  const free = $('#free-mode').checked;
   session = {
-    exercise, free, startedAt: performance.now(), activeMs: 0, lastT: null,
-    set: 1, setsTotal: free ? Infinity : plan.sets, target: free ? Infinity : plan.reps,
+    exercise, planMode: planMode(), activeMs: 0, lastT: null,
     analyzer: createAnalyzer(exercise, getSettings()),
-    done: { reps: 0, goodReps: 0, partials: 0, faults: {} },
-    resting: false, restEnd: 0, lastWaterAt: 0, lastSeen: 0, ended: false,
+    set: 1, setStartReps: 0, planDone: false,
+    resting: false, restEnd: 0, lastWaterAt: 0, limitWarned: false, ended: false,
   };
   resetCounters();
+  $('#rest').classList.remove('show');
   $('#summary').classList.add('hidden');
-  speak(`${EXERCISES[exercise].name}. ${free ? 'Free count.' : `Set 1 of ${plan.sets}. ${plan.reps} reps.`}`, { force: true });
-}
-
-function bankSet() {
-  const s = session.analyzer.summary();
-  session.done.reps += s.reps;
-  session.done.goodReps += s.goodReps;
-  session.done.partials += s.partials;
-  for (const [k, v] of Object.entries(s.faults)) session.done.faults[k] = (session.done.faults[k] || 0) + v;
-}
-
-function totals() {
-  const s = session.analyzer.summary();
-  const faults = { ...session.done.faults };
-  for (const [k, v] of Object.entries(s.faults)) faults[k] = (faults[k] || 0) + v;
-  return {
-    reps: session.done.reps + s.reps,
-    goodReps: session.done.goodReps + s.goodReps,
-    partials: session.done.partials + s.partials,
-    faults,
-  };
+  speak(`${EXERCISES[exercise].name}. ${session.planMode ? `Set 1 of ${plan.sets}. ${plan.reps} reps.` : 'I will count every rep.'}`, { force: true });
 }
 
 function startRest() {
-  bankSet();
   session.resting = true;
-  session.restEnd = performance.now() + plan.restSec * 1000;
+  session.restEnd = (session.lastT ?? performance.now()) + plan.restSec * 1000; // same clock as the video frames
   $('#rest-next').textContent = String(session.set + 1);
   $('#rest').classList.add('show');
   speak(`Set complete. Rest ${plan.restSec} seconds.`, { force: true });
 }
 
 function endRest() {
+  if (!session?.resting) return;
   session.resting = false;
   session.set += 1;
-  session.analyzer = createAnalyzer(exercise, getSettings());
+  session.setStartReps = session.analyzer.summary().reps;
   $('#rest').classList.remove('show');
-  $('#c-reps').textContent = '0';
   $('#hud-set').textContent = `Set ${session.set}/${plan.sets}`;
+  renderCounters(session.analyzer.summary());
   speak(`Set ${session.set}. Go!`, { force: true });
 }
-$('#skip-rest').addEventListener('click', () => session?.resting && endRest());
+$('#skip-rest').addEventListener('click', endRest);
 
 function endSession(showSummary = true, reason = '') {
   if (!session || session.ended) return;
   session.ended = true;
-  const t = totals();
+  const t = session.analyzer.summary();
   const result = {
     exercise: session.exercise, reps: t.reps, goodReps: t.goodReps, partials: t.partials, faults: t.faults,
     durationSec: Math.round(session.activeMs / 1000), source, at: Date.now(),
@@ -151,7 +153,7 @@ function endSession(showSummary = true, reason = '') {
     const f = Object.entries(t.faults).sort((a, b) => b[1] - a[1]);
     $('#s-faults').innerHTML = f.length
       ? '<strong>Work on:</strong> ' + f.map(([k, v]) => `${esc(k)} (${v}×)`).join(', ')
-      : (t.reps ? '<strong>Great form on every counted rep!</strong>' : '');
+      : (t.reps ? '<strong>Great form on every rep!</strong>' : '');
     $('#summary').classList.remove('hidden');
     nudge($('#summary'));
     save('lastSession', result);
@@ -172,60 +174,59 @@ function onFrame(lm, { aspect, t }) {
   drawSkeleton(canvas, video, lm);
   if (!session) return;
 
-  if (session.lastT !== null && !session.resting) session.activeMs += Math.min(1000, t - session.lastT);
+  if (session.lastT !== null) session.activeMs += Math.min(1000, t - session.lastT);
   session.lastT = t;
   $('#hud-time').textContent = fmtTime(session.activeMs / 1000);
 
+  // rest countdown (a reminder only: counting carries on underneath)
   if (session.resting) {
     const left = (session.restEnd - t) / 1000;
     $('#rest-num').textContent = Math.max(0, Math.ceil(left));
     if (left <= 0) endRest();
-    return;
   }
 
-  // Heat limits (not in free-count mode)
-  if (!session.free) {
-    const mins = session.activeMs / 60000;
-    if (mins >= plan.maxMinutes) {
-      endSession(true, `That's your safe limit of ${plan.maxMinutes} minutes for today's heat. Cool down and drink water.`);
-      return;
-    }
-    if (plan.waterEveryMin && mins - session.lastWaterAt >= plan.waterEveryMin) {
-      session.lastWaterAt = mins;
-      toast('Water break: take a few sips.', 'warn');
-      speak('Water break. Take a few sips.', { force: true });
-    }
+  // heat safety
+  const mins = session.activeMs / 60000;
+  if (mins >= plan.maxMinutes && !session.limitWarned) {
+    session.limitWarned = true;
+    const msg = `That's your safe limit of ${plan.maxMinutes} minutes for today's heat. Cool down and drink water.`;
+    if (session.planMode) { endSession(true, msg); return; }
+    toast(msg, 'warn');
+    speak(msg, { force: true });
+  }
+  if (plan.waterEveryMin && mins - session.lastWaterAt >= plan.waterEveryMin) {
+    session.lastWaterAt = mins;
+    toast('Water break: take a few sips.', 'warn');
+    speak('Water break. Take a few sips.', { force: true });
   }
 
   if (!lm) { setCue('Step into the frame', 'info'); return; }
   const r = session.analyzer.update(lm, aspect, t);
-  if (!r.visible) { setCue('Step back: I need to see your whole body', 'info'); return; }
+  if (!r.visible) { setCue(exercise === 'jacks' ? 'Step back: I need to see your arms and shoulders' : 'Step back: I need to see more of your body', 'info'); return; }
 
   $('#metrics').innerHTML = Object.entries(r.metrics)
-    .map(([k, v]) => `<div><span class="muted">${k}</span><strong>${k.includes('angle') || k.includes('lean') || k.includes('line') ? Math.round(v) + '°' : v.toFixed(2)}</strong></div>`).join('');
+    .map(([k, v]) => `<div><span class="muted">${k}</span><strong>${fmtMetric(k, v)}</strong></div>`).join('');
 
-  const tot = totals();
-  $('#c-reps').textContent = r.reps;
-  $('#c-good').textContent = tot.goodReps;
-  $('#c-total').textContent = tot.reps;
+  const sum = session.analyzer.summary();
+  renderCounters(sum);
 
   if (r.event === 'rep') {
     flash(r.repGood ? 'good' : 'warn');
     pop($('#c-reps').closest('.tile'), 1.12);
     if (r.repGood) { setCue(`Rep ${r.reps}: good form`, 'good'); speak(String(r.reps)); }
-    else { setCue(`Rep ${r.reps}: ${CUES[r.faults[0]]}`, 'warn'); speak(`${r.reps}. ${CUES[r.faults[0]]}`); }
-    if (r.reps >= session.target) {
-      if (session.set >= session.setsTotal) { bankSet(); endSessionAfterSets(); }
-      else startRest();
+    else { setCue(`Rep ${r.reps}: ${CUES[r.faults[0]] || r.faults[0]}`, 'warn'); speak(`${r.reps}. ${CUES[r.faults[0]] || ''}`); }
+
+    if (session.planMode && !session.resting && !session.planDone && r.reps - session.setStartReps >= plan.reps) {
+      if (session.set >= plan.sets) {
+        session.planDone = true;
+        renderCounters(sum);
+        setCue('Plan complete! Extra reps still count', 'good');
+        speak('Plan complete. Great job! Extra reps still count. Press Finish when you are done.', { force: true });
+      } else startRest();
     }
     return;
   }
-  if (r.event === 'partial') {
-    flash('warn');
-    setCue('Not counted: go a bit lower', 'warn');
-    speak('Go a bit lower');
-    return;
-  }
+  if (session.resting && r.phase === 'down') { setCue('Rest time! (reps still count)', 'info'); return; }
   if (r.feedback.length) {
     const f = r.feedback.find((x) => x.level === 'warn') || r.feedback[0];
     setCue(f.msg, f.level);
@@ -233,11 +234,9 @@ function onFrame(lm, { aspect, t }) {
   }
 }
 
-function endSessionAfterSets() {
-  // all sets complete: the last set is already banked, so swap in an empty analyser
-  session.analyzer = createAnalyzer(exercise, getSettings());
-  endSession(true, 'Workout complete. Great job! Cool down and drink water.');
-  setCue('Workout complete!', 'good');
+// Test hook for automated browser tests (only with ?test in the address).
+if (new URLSearchParams(location.search).has('test')) {
+  window.__nashat = { begin: beginSession, feed: (lm, t, aspect = 4 / 3) => onFrame(lm, { aspect, t }), end: endSession };
 }
 
 // ── start / stop ──

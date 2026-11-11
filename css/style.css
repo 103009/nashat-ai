@@ -231,9 +231,16 @@ legend { font-weight: 600; margin-bottom: 0.35rem; }
 .counter .tile.big .v { font-size: 3.4rem; color: var(--primary); }
 .coach-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.25rem; align-items: start; }
 @media (max-width: 960px) { .coach-layout { grid-template-columns: 1fr; } }
-.rest-overlay { position: absolute; inset: 0; display: none; place-items: center; text-align: center; background: rgba(15, 20, 32, 0.9); }
-.rest-overlay.show { display: grid; }
-.rest-overlay .num { font: 700 5rem/1 var(--font-head); color: var(--info); }
+.rest-overlay {
+  position: absolute; left: 0.75rem; right: 0.75rem; top: 3.4rem; display: none; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  padding: 0.5rem 0.75rem; border-radius: 14px; border: 1px solid rgba(56, 189, 248, 0.5);
+  background: rgba(13, 18, 32, 0.72); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+.rest-overlay.show { display: flex; }
+.rest-overlay .rest-label { font: 700 1.1rem/1 var(--font-head); text-transform: uppercase; color: #BAE6FD; letter-spacing: 0.06em; }
+.rest-overlay .num { font: 700 2rem/1 var(--font-head); color: var(--info); }
+.rest-overlay .rest-unit { color: var(--info); font-weight: 700; margin-left: -0.4rem; }
+.rest-overlay .btn { margin-left: auto; min-height: 34px; }
 .loading { display: flex; align-items: center; gap: 0.6rem; }
 .spinner { width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

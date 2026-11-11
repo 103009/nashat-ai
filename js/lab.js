@@ -206,8 +206,8 @@ $('#clear').addEventListener('click', () => {
 
 // ── tuning ──
 const SLIDERS = [
+  ['goodDepth', 'Depth needed for "good form" (every rep is counted)', 0.5, 0.95, 0.05, ''],
   ['squatDownAngle', 'Squat: full-depth knee angle', 70, 130, 1, '°'],
-  ['squatPartialAngle', 'Squat: "go lower" knee angle', 100, 150, 1, '°'],
   ['squatLeanMax', 'Squat: max torso lean', 25, 70, 1, '°'],
   ['pushupDownAngle', 'Push-up: bottom elbow angle', 60, 120, 1, '°'],
   ['pushupBodyLineMin', 'Push-up: straight body (min)', 130, 175, 1, '°'],

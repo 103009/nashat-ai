@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=6">
-  <link rel="stylesheet" href="css/home.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/home.css?v=7">
   <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
 </head>
 <body class="home">
@@ -202,7 +202,7 @@
           </div>
           <span class="h-num">03</span>
           <h3>Measure the angles</h3>
-          <p class="muted">Our code turns the points into joint angles. Knee below 100°? That's full depth. Back up past 160°? One rep.</p>
+          <p class="muted">Our code turns the points into a depth score from your knee angle and how far your hips drop. Down past halfway and back up = one rep. 80% depth or more = good form.</p>
         </article>
 
         <article class="h-panel" id="p-voice">
@@ -302,6 +302,6 @@
     </div>
   </section>
 </main>
-<script type="module" src="js/home.js?v=6"></script>
+<script type="module" src="js/home.js?v=7"></script>
 </body>
 </html>

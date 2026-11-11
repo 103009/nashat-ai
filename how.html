@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0F1420">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <script>(function(){var d=document.documentElement,p=null;try{p=localStorage.getItem('nashat.motion')}catch(e){}var on=p==='on'||(p!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches);if(p==='on')d.classList.add('motion-forced');if(on){d.classList.add('js-motion');try{if(sessionStorage.getItem('nashat.wipe'))d.classList.add('wipe-enter')}catch(e){}}})()</script>
 </head>
 <body>
@@ -44,7 +44,7 @@
       <div class="pipe"><span class="n">1 · Data</span><h3>Labelled photos</h3><p class="muted small">Many images of people in different poses. In each one, humans marked where the shoulders, elbows, hips, knees and so on are.</p><span class="badge">Done by Google</span></div>
       <div class="pipe"><span class="n">2 · Training</span><h3>Learning patterns</h3><p class="muted small">A neural network guessed the joint positions, compared its guesses with the labels, and adjusted millions of numbers to make the error smaller, over and over.</p><span class="badge">Done by Google</span></div>
       <div class="pipe"><span class="n">3 · Prediction</span><h3>33 body points</h3><p class="muted small">On your phone, the trained model gets each video frame and predicts 33 landmarks (x, y, depth) plus how sure it is that each one is visible.</p><span class="badge badge-ai">AI, live on your device</span></div>
-      <div class="pipe"><span class="n">4 · Our rules</span><h3>Angles → coaching</h3><p class="muted small">Our code turns the points into joint angles (e.g. hip–knee–ankle). A state machine counts a rep when you go down past a target angle and back up, and checks form.</p><span class="badge badge-rule">Written by our team</span></div>
+      <div class="pipe"><span class="n">4 · Our rules</span><h3>Angles → coaching</h3><p class="muted small">Our code turns the points into a depth score (knee or elbow angle, plus how far your hips or shoulders drop). A state machine counts a rep each time you go past halfway and come back up, then checks form.</p><span class="badge badge-rule">Written by our team</span></div>
     </div>
     </section>
 

@@ -1,8 +1,20 @@
-// Exercise analysers.
+// Exercise analysers (v2).
 //
 // The AI model (MediaPipe Pose Landmarker) gives us 33 body landmarks per video
-// frame. This file turns those landmarks into joint angles and uses simple
-// rules (a "state machine") to count reps and spot form mistakes.
+// frame. This file turns those landmarks into ONE number per frame, the rep
+// "progress" p (0 = start position, 1 = bottom of a full rep), and a small
+// state machine counts a rep each time p goes down past 0.5 and comes back up
+// below 0.2.
+//
+// Why this design (after user testing showed under-counting):
+//  • Every rep is counted. Shallow reps still count, but are marked "not deep enough".
+//  • Depth is measured two ways and the larger is used, so it works facing the
+//    camera AND side-on: a joint angle (knee/elbow) and how far the body drops
+//    (hip towards knee height, shoulders towards the hands). A front camera makes
+//    knee angles look straighter than they are, but the hip drop is still clear.
+//  • The start position is learned from YOU (decaying maximum), so you don't need
+//    to lock your knees/elbows perfectly straight for a rep to finish.
+//  • Smoothing adapts to the frame rate, so slow computers don't "miss" the bottom.
 //
 // Landmark numbers used (BlazePose topology):
 //   0 nose · 11/12 shoulders · 13/14 elbows · 15/16 wrists
@@ -15,18 +27,23 @@ export const L = {
 
 export const EXERCISES = {
   squat: {
-    id: 'squat', name: 'Squats', view: 'Side-on or facing the camera',
-    setup: 'Stand 2–3 m from the camera so your whole body, head to feet, is in the frame.',
+    id: 'squat', name: 'Squats', view: 'Facing the camera or side-on',
+    setup: 'Stand 2–3 m from the camera so your body from head to knees (ideally feet) is in the frame.',
   },
   pushup: {
-    id: 'pushup', name: 'Push-ups', view: 'Side-on to the camera',
-    setup: 'Put the phone on the floor about 2 m away, side-on, so it can see you from head to feet.',
+    id: 'pushup', name: 'Push-ups', view: 'Side-on works best',
+    setup: 'Put the camera low, about 2 m away and side-on, so it can see your head, arms and hips.',
   },
   jacks: {
     id: 'jacks', name: 'Jumping jacks', view: 'Facing the camera',
-    setup: 'Face the camera, 2–3 m away, with room to spread your arms and legs.',
+    setup: 'Face the camera, 2–3 m away, with room to spread your arms. Your hands must stay in the frame above your head.',
   },
 };
+
+// Rep state machine thresholds (on the progress value p)
+const DOWN_ENTER = 0.5; // p above this = you are going down into a rep
+const UP_EXIT = 0.2;    // p below this = you are back at the start → rep complete
+const MIN_REP_MS = 300; // ignore impossible double-counts
 
 // ── geometry helpers ──────────────────────────────────────────
 // Landmarks are 0–1 of the image width/height, so x is scaled by the
@@ -44,32 +61,154 @@ export function angleAt(a, b, c) {
 /** Angle of the line a→b away from vertical, in degrees (0 = upright). */
 const fromVertical = (a, b) => (Math.atan2(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) * 180) / Math.PI;
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, v: Math.min(a.v, b.v) });
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const vis = (lm, ids) => ids.reduce((s, i) => s + (lm[i].visibility ?? 1), 0) / ids.length;
 
-/** Pick the body side the camera sees best (for side-on exercises). */
-function bestSide(lm, aspect, idsLeft, idsRight) {
-  const vis = (ids) => ids.reduce((s, i) => s + (lm[i].visibility ?? 1), 0) / ids.length;
-  const left = vis(idsLeft), right = vis(idsRight);
-  const ids = left >= right ? idsLeft : idsRight;
-  return { pts: ids.map((i) => P(lm, i, aspect)), vis: Math.max(left, right) };
+/** Pick the body side (left/right) the camera sees best. */
+function bestSide(lm, left, right) {
+  return vis(lm, left) >= vis(lm, right) ? left : right;
 }
 
-function smoother(alpha) {
+/** A maximum that slowly "forgets", so the start position adapts to each person. */
+function decayingMax(initial, perSecond) {
+  let v = initial;
+  return {
+    get: () => v,
+    update(x, dtMs) { v = Math.max(x, v - perSecond * (dtMs / 1000)); return v; },
+    reset() { v = initial; },
+  };
+}
+
+/** Exponential smoothing that weakens when frames are far apart (slow computers). */
+function smoother(strength) {
   let v = null;
   return {
-    next(x) { v = v === null ? x : alpha * v + (1 - alpha) * x; return v; },
+    next(x, dtMs) {
+      if (v === null || !Number.isFinite(x)) { v = x; return v; }
+      const a = Math.pow(strength, Math.max(1, dtMs) / 33); // 33 ms ≈ one frame at 30 fps
+      v = a * v + (1 - a) * x;
+      return v;
+    },
     reset() { v = null; },
+  };
+}
+
+// ── per-exercise "progress" readers ─────────────────────────────
+// Each returns { visible, p, metrics, live: [{msg, level}], faults: Set (form problems this frame) }
+
+function squatReader(s) {
+  const standAngle = decayingMax(165, 4);   // your straight-leg knee angle
+  const standRatio = decayingMax(0.75, 0.08); // your standing hip-above-knee height (÷ torso)
+  const standTilt = decayingMax(-15, 6);       // minus your standing thigh tilt (a "decaying minimum")
+  return (lm, aspect, dt) => {
+    const [sh, hip, knee, ankle] = bestSide(lm, [11, 23, 25, 27], [12, 24, 26, 28]).map((i) => P(lm, i, aspect));
+    if (Math.min(sh.v, hip.v, knee.v) < s.minVisibility) return { visible: false };
+    const torso = Math.max(1e-6, dist(sh, hip));
+    // signal 1: knee angle (needs the ankle)
+    let pAngle = 0, kneeAngle = null;
+    if (ankle.v >= s.minVisibility * 0.8) {
+      kneeAngle = angleAt(hip, knee, ankle);
+      const stand = standAngle.update(Math.min(kneeAngle, 180), dt);
+      pAngle = clamp01((stand - kneeAngle) / Math.max(20, stand - s.squatDownAngle));
+    }
+    // signal 2: hip drops towards knee height (works facing the camera)
+    const ratio = (knee.y - hip.y) / torso;
+    const standR = standRatio.update(ratio, dt);
+    const pDrop = clamp01((standR - ratio) / Math.max(0.2, standR - 0.12));
+    // signal 3: thigh tilts from upright towards horizontal (works side-on even without the feet)
+    const tilt = fromVertical(hip, knee);
+    const stand0 = -standTilt.update(-tilt, dt);
+    const pTilt = clamp01((tilt - stand0) / Math.max(30, 75 - stand0));
+    const p = Math.max(pAngle, pDrop, pTilt);
+
+    const lean = fromVertical(sh, hip);
+    const faults = new Set();
+    const live = [];
+    // forward lean only means something side-on (shoulders look narrow)
+    const lSh = P(lm, 11, aspect), rSh = P(lm, 12, aspect);
+    const sideOn = dist(lSh, rSh) < 0.45 * torso;
+    if (sideOn && p > 0.6 && lean > s.squatLeanMax) { faults.add('Leaning too far forward'); live.push({ msg: 'Keep your chest up', level: 'warn' }); }
+    // knees caving in (facing the camera, deep part of the squat)
+    if (!sideOn && p > 0.7) {
+      const lk = P(lm, 25, aspect), rk = P(lm, 26, aspect), la = P(lm, 27, aspect), ra = P(lm, 28, aspect);
+      if (Math.min(la.v, ra.v) > s.minVisibility && dist(lk, rk) < 0.7 * dist(la, ra)) {
+        faults.add('Knees caving in'); live.push({ msg: 'Push your knees out', level: 'warn' });
+      }
+    }
+    if (p >= s.goodDepth) live.push({ msg: 'Good depth. Now drive up!', level: 'good' });
+    return { visible: true, p, faults, live, metrics: { Depth: p, 'Knee angle': kneeAngle, 'Torso lean': lean } };
+  };
+}
+
+function pushupReader(s) {
+  const topAngle = decayingMax(160, 4);
+  const topDrop = decayingMax(0.6, 0.06); // shoulder height above the hands at the top (÷ arm length)
+  return (lm, aspect, dt) => {
+    const [sh, el, wr, hip, ank] = bestSide(lm, [11, 13, 15, 23, 27], [12, 14, 16, 24, 28]).map((i) => P(lm, i, aspect));
+    if (Math.min(sh.v, el.v, wr.v) < s.minVisibility) return { visible: false };
+    // standing up = hips clearly BELOW the shoulders and the torso upright
+    // (in a push-up the hips are level with the shoulders, or look higher when the camera is in front of you)
+    const armLen = dist(sh, el) + dist(el, wr);
+    if (hip.v >= s.minVisibility * 0.8 && hip.y - sh.y > 0.5 * armLen && fromVertical(sh, hip) < 35) {
+      return { visible: true, p: 0, faults: new Set(), metrics: {}, live: [{ msg: 'Get into the push-up position', level: 'info' }], notInPosition: true };
+    }
+    const elbow = angleAt(sh, el, wr);
+    const top = topAngle.update(Math.min(elbow, 180), dt);
+    const pAngle = clamp01((top - elbow) / Math.max(20, top - s.pushupDownAngle));
+    const arm = Math.max(1e-6, dist(sh, el) + dist(el, wr));
+    const drop = (wr.y - sh.y) / arm; // shrinks as the chest goes down
+    const topD = topDrop.update(drop, dt);
+    const pDrop = clamp01((topD - drop) / Math.max(0.15, topD * 0.55));
+    const p = Math.max(pAngle, pDrop);
+
+    const faults = new Set();
+    const live = [];
+    let body = null;
+    if (hip.v >= s.minVisibility && ank.v >= s.minVisibility) {
+      body = angleAt(sh, hip, ank);
+      if (body < s.pushupBodyLineMin) {
+        const lineY = sh.y + ((hip.x - sh.x) / ((ank.x - sh.x) || 1e-6)) * (ank.y - sh.y);
+        const f = hip.y > lineY ? 'Hips sagging' : 'Hips too high';
+        faults.add(f);
+        live.push({ msg: f === 'Hips sagging' ? 'Lift your hips, keep your body straight' : 'Lower your hips, keep your body straight', level: 'warn' });
+      }
+    }
+    if (p >= s.goodDepth) live.push({ msg: 'Good depth. Push up!', level: 'good' });
+    return { visible: true, p, faults, live, metrics: { Depth: p, 'Elbow angle': elbow, 'Body line': body } };
+  };
+}
+
+function jacksReader(s) {
+  return (lm, aspect) => {
+    const nose = P(lm, 0, aspect);
+    const lSh = P(lm, 11, aspect), rSh = P(lm, 12, aspect);
+    const lWr = P(lm, 15, aspect), rWr = P(lm, 16, aspect);
+    if (Math.min(lSh.v, rSh.v, lWr.v, rWr.v) < s.minVisibility) return { visible: false };
+    const shoulderW = Math.max(1e-6, dist(lSh, rSh));
+    // arms: 0 = hands by your sides, 1 = hands level with your nose or higher
+    const shY = (lSh.y + rSh.y) / 2;
+    const low = shY + shoulderW * 0.9;
+    const armOf = (w) => (low - w.y) / Math.max(1e-6, low - nose.y);
+    const arms = Math.max(0, Math.min(1.2, (armOf(lWr) + armOf(rWr)) / 2));
+    const p = clamp01(arms);
+    const lAn = P(lm, 27, aspect), rAn = P(lm, 28, aspect);
+    const feet = Math.min(lAn.v, rAn.v) >= s.minVisibility ? dist(lAn, rAn) / shoulderW : null;
+    return { visible: true, p, faults: new Set(), live: [], feet, metrics: { 'Arms up': arms, 'Feet apart': feet } };
   };
 }
 
 // ── analyser factory ──────────────────────────────────────────
 export function createAnalyzer(type, settings) {
-  const s = settings;
-  const sm = { a: smoother(s.smoothing), b: smoother(s.smoothing), c: smoother(s.smoothing) };
-  let state;
+  const s = { goodDepth: 0.8, ...settings };
+  const make = { squat: squatReader, pushup: pushupReader, jacks: jacksReader }[type];
+  if (!make) throw new Error('Unknown exercise ' + type);
+  let reader, sm, state, lastT;
+
   const reset = () => {
-    state = { phase: 'ready', reps: 0, goodReps: 0, partials: 0, rep: null, lastRepAt: -1e9, armed: false, faults: {} };
-    sm.a.reset(); sm.b.reset(); sm.c.reset();
+    reader = make(s);
+    sm = smoother(s.smoothing);
+    state = { phase: 'ready', armed: false, calm: 0, reps: 0, goodReps: 0, partials: 0, rep: null, lastRepAt: -1e9, faults: {} };
+    lastT = null;
   };
   reset();
 
@@ -78,176 +217,60 @@ export function createAnalyzer(type, settings) {
     feedback: [], metrics: {}, event: null, faults: [], visible: true, ...extra,
   });
 
-  function finishRep(t, faults, out) {
-    if (t - state.lastRepAt < 400) return; // ignore jitter double-counts
-    state.lastRepAt = t;
-    state.reps += 1;
-    const good = faults.length === 0;
-    if (good) state.goodReps += 1;
-    for (const f of faults) state.faults[f] = (state.faults[f] || 0) + 1;
-    out.event = 'rep';
-    out.repGood = good;
-    out.faults = faults;
-    out.reps = state.reps;
-    out.goodReps = state.goodReps;
-  }
-
-  // ── SQUAT ──
-  function squat(lm, aspect, t) {
-    const side = bestSide(lm, aspect, [L.lShoulder, L.lHip, L.lKnee, L.lAnkle], [L.rShoulder, L.rHip, L.rKnee, L.rAnkle]);
-    if (side.vis < s.minVisibility) return result({ visible: false });
-    const [sh, hip, knee, ankle] = side.pts;
-    const knees = sm.a.next(angleAt(hip, knee, ankle));
-    const lean = sm.b.next(fromVertical(sh, hip));
-
-    // Front view? Then also check knees caving in.
-    const lKnee = P(lm, L.lKnee, aspect), rKnee = P(lm, L.rKnee, aspect);
-    const lAnk = P(lm, L.lAnkle, aspect), rAnk = P(lm, L.rAnkle, aspect);
-    const lSh = P(lm, L.lShoulder, aspect), rSh = P(lm, L.rShoulder, aspect);
-    const frontView = dist(lSh, rSh) > 0.6 * dist(mid(lSh, rSh), mid(P(lm, L.lHip, aspect), P(lm, L.rHip, aspect)));
-    const kneeRatio = frontView ? dist(lKnee, rKnee) / Math.max(1e-6, dist(lAnk, rAnk)) : null;
-
-    const out = result({ metrics: { 'Knee angle': knees, 'Torso lean': lean } });
-
-    if (!state.armed) {
-      if (knees > s.squatUpAngle) { state.armed = true; state.phase = 'up'; }
-      else { out.feedback.push({ msg: 'Stand up tall to start', level: 'info' }); return out; }
-    }
-
-    if (state.phase === 'up' && knees < s.squatUpAngle - 10) {
-      state.phase = 'down';
-      state.rep = { minKnee: knees, maxLean: lean, minKneeRatio: kneeRatio ?? 9 };
-    }
-    if (state.phase === 'down') {
-      const r = state.rep;
-      r.minKnee = Math.min(r.minKnee, knees);
-      r.maxLean = Math.max(r.maxLean, lean);
-      if (kneeRatio !== null && knees < s.squatPartialAngle) r.minKneeRatio = Math.min(r.minKneeRatio, kneeRatio);
-      if (lean > s.squatLeanMax) out.feedback.push({ msg: 'Keep your chest up', level: 'warn' });
-      if (knees <= s.squatDownAngle) out.feedback.push({ msg: 'Good depth. Now drive up!', level: 'good' });
-
-      if (knees > s.squatUpAngle) {
-        state.phase = 'up';
-        if (r.minKnee <= s.squatDownAngle) {
-          const faults = [];
-          if (r.maxLean > s.squatLeanMax) faults.push('Leaning too far forward');
-          if (r.minKneeRatio < 0.75) faults.push('Knees caving in');
-          finishRep(t, faults, out);
-        } else if (r.minKnee <= s.squatPartialAngle) {
-          state.partials += 1;
-          out.event = 'partial';
-          out.faults = ['Not deep enough'];
-        }
-        state.rep = null;
-      }
-    }
-    return out;
-  }
-
-  // ── PUSH-UP ──
-  function pushup(lm, aspect, t) {
-    const side = bestSide(lm, aspect,
-      [L.lShoulder, L.lElbow, L.lWrist, L.lHip, L.lAnkle],
-      [L.rShoulder, L.rElbow, L.rWrist, L.rHip, L.rAnkle]);
-    if (side.vis < s.minVisibility) return result({ visible: false });
-    const [sh, el, wr, hip, ank] = side.pts;
-    const elbow = sm.a.next(angleAt(sh, el, wr));
-    const body = sm.b.next(angleAt(sh, hip, ank));
-    const horizontal = fromVertical(sh, ank) > 50; // body is lying, not standing
-
-    const out = result({ metrics: { 'Elbow angle': elbow, 'Body line': body } });
-    if (!horizontal) {
-      out.feedback.push({ msg: 'Get into the push-up position, side-on to the camera', level: 'info' });
-      state.armed = false; state.phase = 'ready';
-      return out;
-    }
-    if (!state.armed) {
-      if (elbow > s.pushupUpAngle) { state.armed = true; state.phase = 'up'; }
-      else { out.feedback.push({ msg: 'Straighten your arms to start', level: 'info' }); return out; }
-    }
-    // Is the hip below the shoulder–ankle line (sagging) or above it (piking)?
-    const lineY = sh.y + ((hip.x - sh.x) / ((ank.x - sh.x) || 1e-6)) * (ank.y - sh.y);
-    const sagging = hip.y > lineY;
-
-    if (body < s.pushupBodyLineMin) {
-      out.feedback.push({ msg: sagging ? 'Lift your hips, keep your body straight' : 'Lower your hips, keep your body straight', level: 'warn' });
-    }
-    if (state.phase === 'up' && elbow < s.pushupUpAngle - 15) {
-      state.phase = 'down';
-      state.rep = { minElbow: elbow, minBody: body, sagging };
-    }
-    if (state.phase === 'down') {
-      const r = state.rep;
-      r.minElbow = Math.min(r.minElbow, elbow);
-      if (body < r.minBody) { r.minBody = body; r.sagging = sagging; }
-      if (elbow <= s.pushupDownAngle) out.feedback.push({ msg: 'Good depth. Push up!', level: 'good' });
-      if (elbow > s.pushupUpAngle) {
-        state.phase = 'up';
-        if (r.minElbow <= s.pushupDownAngle) {
-          const faults = [];
-          if (r.minBody < s.pushupBodyLineMin) faults.push(r.sagging ? 'Hips sagging' : 'Hips too high');
-          finishRep(t, faults, out);
-        } else if (r.minElbow <= s.pushupDownAngle + 30) {
-          state.partials += 1;
-          out.event = 'partial';
-          out.faults = ['Not deep enough'];
-        }
-        state.rep = null;
-      }
-    }
-    return out;
-  }
-
-  // ── JUMPING JACKS ──
-  function jacks(lm, aspect, t) {
-    const ids = [L.nose, L.lShoulder, L.rShoulder, L.lWrist, L.rWrist, L.lAnkle, L.rAnkle];
-    const vis = ids.reduce((sum, i) => sum + (lm[i].visibility ?? 1), 0) / ids.length;
-    if (vis < s.minVisibility) return result({ visible: false });
-    const nose = P(lm, L.nose, aspect);
-    const lSh = P(lm, L.lShoulder, aspect), rSh = P(lm, L.rShoulder, aspect);
-    const lWr = P(lm, L.lWrist, aspect), rWr = P(lm, L.rWrist, aspect);
-    const lAn = P(lm, L.lAnkle, aspect), rAn = P(lm, L.rAnkle, aspect);
-    const shoulderW = Math.max(1e-6, dist(lSh, rSh));
-    const feet = sm.a.next(dist(lAn, rAn) / shoulderW);
-    // arms: 0 = by the sides, 1 = wrists level with the nose or higher
-    const shY = (lSh.y + rSh.y) / 2;
-    const armOf = (w) => (shY + shoulderW * 0.9 - w.y) / Math.max(1e-6, shY + shoulderW * 0.9 - nose.y);
-    const arms = sm.b.next(Math.max(0, Math.min(1.2, Math.min(armOf(lWr), armOf(rWr)))));
-
-    const out = result({ metrics: { 'Feet apart': feet, 'Arms up': arms } });
-    const open = feet > s.jackFeetRatio;
-    const closed = feet < s.jackFeetRatio * 0.7 && arms < 0.4;
-
-    if (!state.armed) {
-      if (closed) { state.armed = true; state.phase = 'closed'; }
-      else { out.feedback.push({ msg: 'Stand with feet together and arms down to start', level: 'info' }); return out; }
-    }
-    if (state.phase === 'closed' && open) {
-      state.phase = 'open';
-      state.rep = { maxArms: arms };
-    }
-    if (state.phase === 'open') {
-      state.rep.maxArms = Math.max(state.rep.maxArms, arms);
-      if (closed) {
-        state.phase = 'closed';
-        const faults = state.rep.maxArms < 0.9 ? ['Arms not all the way up'] : [];
-        finishRep(t, faults, out);
-        state.rep = null;
-      }
-    }
-    return out;
-  }
-
-  const fn = { squat, pushup, jacks }[type];
-  if (!fn) throw new Error('Unknown exercise ' + type);
-
   return {
     type,
     reset,
     /** @param lm 33 landmarks · @param aspect video width ÷ height · @param t time in ms */
     update(lm, aspect, t) {
       if (!lm || lm.length < 33) return result({ visible: false });
-      return fn(lm, aspect, t);
+      const dt = lastT === null ? 33 : Math.min(500, Math.max(1, t - lastT));
+      lastT = t;
+      const r = reader(lm, aspect, dt);
+      if (!r.visible) return result({ visible: false });
+      const p = sm.next(r.p, dt);
+      const out = result({ metrics: r.metrics, feedback: [...r.live] });
+      out.metrics.Depth = p;
+
+      if (r.notInPosition) { state.armed = false; state.calm = 0; state.phase = 'ready'; return out; }
+
+      // wait until the person is in the start position before counting
+      if (!state.armed) {
+        state.calm = p < UP_EXIT ? state.calm + 1 : 0;
+        if (state.calm >= 2) { state.armed = true; state.phase = 'up'; }
+        else { out.feedback.unshift({ msg: type === 'pushup' ? 'Hold the top of a push-up to start' : 'Stand still in the start position', level: 'info' }); return out; }
+      }
+
+      if (state.phase === 'up' && p > DOWN_ENTER) {
+        state.phase = 'down';
+        state.rep = { peak: p, faults: new Set(), feetMax: r.feet ?? null };
+      }
+      if (state.phase === 'down') {
+        const rep = state.rep;
+        rep.peak = Math.max(rep.peak, p);
+        r.faults.forEach((f) => rep.faults.add(f));
+        if (r.feet != null) rep.feetMax = Math.max(rep.feetMax ?? 0, r.feet);
+        if (p < UP_EXIT) {
+          state.phase = 'up';
+          if (t - state.lastRepAt >= MIN_REP_MS) {
+            state.lastRepAt = t;
+            const faults = [...rep.faults];
+            if (type === 'jacks') {
+              if (rep.peak < 0.95) faults.push('Arms not all the way up');
+              if (rep.feetMax != null && rep.feetMax < s.jackFeetRatio) faults.push('Feet not wide enough');
+            } else if (rep.peak < s.goodDepth) {
+              faults.push('Not deep enough');
+              state.partials += 1;
+            }
+            state.reps += 1;
+            const good = faults.length === 0;
+            if (good) state.goodReps += 1;
+            for (const f of faults) state.faults[f] = (state.faults[f] || 0) + 1;
+            Object.assign(out, { event: 'rep', repGood: good, faults, reps: state.reps, goodReps: state.goodReps, partials: state.partials, phase: 'up' });
+          }
+          state.rep = null;
+        }
+      }
+      return out;
     },
     summary() {
       return { reps: state.reps, goodReps: state.goodReps, partials: state.partials, faults: { ...state.faults } };
@@ -263,4 +286,5 @@ export const CUES = {
   'Hips sagging': 'Lift your hips',
   'Hips too high': 'Lower your hips',
   'Arms not all the way up': 'Arms all the way up',
+  'Feet not wide enough': 'Jump your feet wider',
 };
