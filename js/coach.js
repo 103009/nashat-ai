@@ -3,7 +3,7 @@ import { loadPoseModel, startCamera, startFile, stopVideo, runLoop, drawSkeleton
 import { createAnalyzer, EXERCISES, CUES } from './exercises.js';
 import { DEFAULT_PLAN } from './heat.js';
 import { load, save, getSettings, saveSettings } from './store.js';
-import { pop, nudge, motionOn, deviceReducesMotion, scrollToEl } from './motion.js';
+import { pop, nudge, scrollToEl } from './motion.js';
 
 initPage();
 
@@ -352,8 +352,6 @@ async function runChecks() {
     Object.assign(m, { ok: false, detail: `${e.message || e} Try "AI engine: CPU", lower Brave Shields for this site (lion icon in the address bar), and reload.` });
   }
   render();
-  add(motionOn() ? true : null, 'Animations', motionOn() ? 'On'
-    : deviceReducesMotion() ? 'Off because your computer asks for less motion. Use the Motion switch at the top of the page to turn them on.' : 'Turned off with the Motion switch at the top of the page.');
 }
 $('#check-btn').addEventListener('click', runChecks);
 

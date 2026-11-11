@@ -1,7 +1,7 @@
 // Shared page chrome: navigation, footer, voice, small helpers.
 import { CONFIG } from './config.js';
 import { getSettings } from './store.js';
-import { autoAnimate, setupPageTransitions, motionOn, motionPref, setMotionPref, deviceReducesMotion } from './motion.js';
+import { autoAnimate, setupPageTransitions } from './motion.js';
 
 // Simple line icons (Lucide style, MIT licence).
 export const ICONS = {
@@ -60,9 +60,6 @@ export function initPage() {
         <span class="brand-text">${CONFIG.appName}<small lang="ar">${CONFIG.appNameArabic}</small></span>
       </a>
       <nav class="top-nav" aria-label="Main">${links}</nav>
-      <button class="motion-toggle" type="button" aria-pressed="${motionOn()}" title="Turn animations and smooth scrolling on or off">
-        ${icon('sparkles')}<span>Motion: ${motionOn() ? 'on' : 'off'}</span>
-      </button>
     </div>`;
   document.body.prepend(header);
   const aurora = document.createElement('div');
@@ -70,31 +67,6 @@ export function initPage() {
   aurora.setAttribute('aria-hidden', 'true');
   aurora.innerHTML = '<i></i><i></i><i></i><i></i>';
   document.body.prepend(aurora);
-  header.querySelector('.motion-toggle').addEventListener('click', () => {
-    setMotionPref(motionOn() ? 'off' : 'on');
-    location.reload();
-  });
-
-  // The device asks for less motion and the visitor hasn't chosen yet: offer to turn it on.
-  if (motionPref() === 'auto' && deviceReducesMotion()) {
-    const note = document.createElement('div');
-    note.className = 'motion-note';
-    note.setAttribute('role', 'region');
-    note.setAttribute('aria-label', 'Animations');
-    note.innerHTML = `<div class="wrap motion-note-inner">
-        <p>${icon('sparkles')} <span>Animations are paused because your computer's <strong>reduce motion</strong> setting is on.</span></p>
-        <div class="btn-row"><button class="btn btn-sm btn-primary" type="button" data-motion="on">Turn on animations</button>
-        <button class="btn btn-sm btn-ghost" type="button" data-motion="off">Keep them off</button></div>
-      </div>`;
-    header.after(note);
-    note.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-motion]');
-      if (!b) return;
-      setMotionPref(b.dataset.motion);
-      if (b.dataset.motion === 'on') location.reload(); else note.remove();
-    });
-  }
-
   const tab = document.createElement('nav');
   tab.className = 'tab-bar';
   tab.setAttribute('aria-label', 'Main');

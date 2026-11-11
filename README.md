@@ -80,8 +80,7 @@ CDNs at the symposium. Only the live weather button needs internet; fonts and an
 ## Animations & smooth scrolling
 
 - Animations use GSAP (ScrollTrigger, SplitText, DrawSVG); smooth scrolling uses Lenis, driven by GSAP's ticker.
-- They follow the computer's "reduce motion" setting. Visitors can override it with the **Motion** switch in the header
-  (the choice is remembered). If Windows "Animation effects" is off, the site shows a notice with a "Turn on animations" button.
+- Motion is always on, on every device (there is no off switch).
 
 ## Rep counting
 

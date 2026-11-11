@@ -116,9 +116,6 @@ body.home .site-footer { margin-top: 0; }
 .cta-inner h2 { font-size: clamp(2.4rem, 7vw, 4.4rem); }
 .cta-inner .lead { color: #FDE7D3; margin-inline: auto; max-width: 40ch; font-size: 1.2rem; }
 
-@media (prefers-reduced-motion: reduce) {
-  .phone { transition: none; }
-}
 
 /* ═══════════ GLASS + PHOTOS (home) ═══════════ */
 .h-panel, .story-step { background-color: var(--glass); }

@@ -3,8 +3,7 @@
 // • GSAP + ScrollTrigger + SplitText + DrawSVG (official GSAP skill guidance)
 // • Lenis smooth scrolling driven by GSAP's ticker (Lenis skill guidance)
 // • Page-to-page wipe transitions, scroll progress bar, auto-hiding header
-// • Motion follows the device setting ("reduce motion") unless the visitor
-//   flips the Motion switch in the header — their choice is remembered.
+// • Motion is always on (the team's design choice), on every device.
 //
 // GSAP © GreenSock (standard no-charge licence) · Lenis © darkroom.engineering (MIT)
 
@@ -16,21 +15,8 @@ const SCRIPTS = [
   ['DrawSVGPlugin', 'gsap/DrawSVGPlugin.min.js'],
   ['Lenis', 'lenis/lenis.min.js'],
 ];
-const PREF_KEY = 'nashat.motion'; // 'on' | 'off' | absent (= follow device)
-
-export const deviceReducesMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-export function motionPref() {
-  try { return localStorage.getItem(PREF_KEY) || 'auto'; } catch { return 'auto'; }
-}
-export function setMotionPref(v) {
-  try { localStorage.setItem(PREF_KEY, v); } catch { /* ignore */ }
-}
-export const motionOn = () => {
-  const p = motionPref();
-  return p === 'on' || (p === 'auto' && !deviceReducesMotion());
-};
-/** Kept for older callers. */
-export const reducedMotion = () => !motionOn();
+/** Motion is always on. */
+export const motionOn = () => true;
 
 let gsapPromise = null;
 let lenis = null;
@@ -50,7 +36,6 @@ function loadScript(src) {
 export function ready() {
   if (!gsapPromise) {
     gsapPromise = (async () => {
-      if (!motionOn()) return null;
       try {
         for (const [name, file] of SCRIPTS) if (!window[name]) await loadScript(new URL(file, BASE).href);
         const { gsap, ScrollTrigger, SplitText, DrawSVGPlugin, Lenis } = window;
@@ -64,7 +49,7 @@ export function ready() {
           anchors: { offset: -80 },
           allowNestedScroll: true,
           stopInertiaOnNavigate: true,
-          respectReducedMotion: motionPref() !== 'on', // the visitor explicitly asked for motion
+          respectReducedMotion: false, // motion is always on for this site
         });
         lenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -95,7 +80,6 @@ export function setupPageTransitions() {
   // coming back with the browser's Back button can restore a covered page
   window.addEventListener('pageshow', (e) => { if (e.persisted) html.classList.remove('wipe-leave'); });
   try { sessionStorage.removeItem(WIPE_KEY); } catch { /* ignore */ }
-  if (!motionOn()) return;
 
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
