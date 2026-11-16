@@ -82,6 +82,15 @@ CDNs at the symposium. Only the live weather button needs internet; fonts and an
 - Animations use GSAP (ScrollTrigger, SplitText, DrawSVG); smooth scrolling uses Lenis, driven by GSAP's ticker.
 - Motion is always on, on every device (there is no off switch).
 
+## After every update: bump the version
+
+Browsers keep the site's files for up to 10 minutes. So that nobody sees a mix of old and new files,
+run this before each upload (use a bigger number each time), then refresh once (F5):
+
+```bash
+python3 tools/set-version.py 10
+```
+
 ## Rep counting
 
 Each frame becomes a depth score from 0 (start position) to 1 (bottom of a full rep), using the larger of

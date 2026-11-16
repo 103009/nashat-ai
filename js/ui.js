@@ -1,7 +1,7 @@
 // Shared page chrome: navigation, footer, voice, small helpers.
-import { CONFIG } from './config.js';
-import { getSettings } from './store.js';
-import { autoAnimate, setupPageTransitions } from './motion.js';
+import { CONFIG } from './config.js?v=9';
+import { getSettings } from './store.js?v=9';
+import { autoAnimate, setupPageTransitions } from './motion.js?v=9';
 
 // Simple line icons (Lucide style, MIT licence).
 export const ICONS = {

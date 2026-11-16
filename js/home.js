@@ -4,11 +4,11 @@
 // uses ease "none" with containerAnimation for nested triggers, gsap.matchMedia()
 // for desktop/mobile + reduced motion, and ScrollTrigger.refresh() after images/fonts.
 
-import { initPage } from './ui.js';
-import { ready, photoReveals, settle } from './motion.js';
-import { heatIndexC, levelFor } from './heat.js';
-import { PHOTO_POSES } from './photo-poses.js';
-import { angleAt } from './exercises.js';
+import { initPage } from './ui.js?v=9';
+import { ready, photoReveals, settle } from './motion.js?v=9';
+import { heatIndexC, levelFor } from './heat.js?v=9';
+import { PHOTO_POSES } from './photo-poses.js?v=9';
+import { angleAt } from './exercises.js?v=9';
 
 initPage();
 

@@ -2,7 +2,7 @@
 // (US National Weather Service heat index) plus safety rules. The AI part of
 // Nashat is the pose detection in the coach.
 
-import { CONFIG } from './config.js';
+import { CONFIG } from './config.js?v=9';
 
 const cToF = (c) => c * 9 / 5 + 32;
 const fToC = (f) => (f - 32) * 5 / 9;
