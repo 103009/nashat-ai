@@ -33,7 +33,7 @@ export const CONFIG = {
   // Separate paragraphs with a blank line.
   ethicsStatement: `Nashat uses AI to coach exercise, so we thought carefully about its risks.
 
-Bias: Pose-detection models can be less accurate for some body types, skin tones, or loose clothing such as a thobe or abaya. We test Nashat with people of different builds, lighting and clothing, record accuracy for each in our Test Lab, and adjust the counting rules if any group is under-counted.
+Bias: Pose-detection models can be less accurate for some body types, skin tones, or loose clothing such as a thobe or abaya. Our Test Lab records accuracy by lighting, clothing and camera view, so the counting rules can be adjusted if any group is under-counted.
 
 Privacy: A camera pointed at someone's body is sensitive. Nashat's AI runs entirely in the browser, so video is never uploaded, recorded or stored. There are no accounts, and testers are logged with codes, not names.
 

@@ -1,9 +1,9 @@
-import { initPage, $, $$, speak, toast, fmtTime, esc } from './ui.js?v=9';
-import { loadPoseModel, startCamera, startFile, stopVideo, runLoop, drawSkeleton, CAMERA_HELP, modelInfo } from './pose.js?v=9';
-import { createAnalyzer, EXERCISES, CUES } from './exercises.js?v=9';
-import { DEFAULT_PLAN } from './heat.js?v=9';
-import { load, save, getSettings, saveSettings } from './store.js?v=9';
-import { pop, nudge, scrollToEl } from './motion.js?v=9';
+import { initPage, $, $$, speak, toast, fmtTime, esc } from './ui.js?v=10';
+import { loadPoseModel, startCamera, startFile, stopVideo, runLoop, drawSkeleton, CAMERA_HELP, modelInfo } from './pose.js?v=10';
+import { createAnalyzer, EXERCISES, CUES } from './exercises.js?v=10';
+import { DEFAULT_PLAN } from './heat.js?v=10';
+import { load, save, getSettings, saveSettings } from './store.js?v=10';
+import { pop, nudge, scrollToEl } from './motion.js?v=10';
 
 initPage();
 

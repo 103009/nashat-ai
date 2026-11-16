@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nashat — tri-fold brochure (A4)</title>
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/fonts.css?v=9">
+  <link rel="stylesheet" href="css/fonts.css?v=10">
   <style>
     /* Tri-fold A4 landscape: 2 sheets (outside + inside), 3 panels of 99 mm each */
     @page { size: A4 landscape; margin: 0; }
@@ -223,18 +223,19 @@
     <!-- results + ethics -->
     <div class="panel">
       <span class="eyebrow">Results</span>
-      <h2>Tested with <span>real people</span></h2>
+      <h2>How we <span>tested it</span></h2>
       <div class="stats" id="stats">
-        <div class="stat"><div class="v" id="r-acc">___%</div><div class="k">rep-count accuracy (AI vs. a person counting)</div></div>
-        <div class="stat"><div class="v" id="r-people">___</div><div class="k">people tested</div></div>
-        <div class="stat"><div class="v" id="r-ease">___/5</div><div class="k">ease of use (tester rating)</div></div>
-        <div class="stat"><div class="v" id="r-tests">___</div><div class="k">test sets logged</div></div>
-        <div class="stat sim"><div class="v">22 / 22</div><div class="k">simulated checks passed, including 40-rep sets, front and side camera views and slow computers</div></div>
+        <div class="stat"><div class="v">22 / 22</div><div class="k">test scenarios passed (simulated body movements)</div></div>
+        <div class="stat"><div class="v">40 / 40</div><div class="k">reps counted in every 40-rep test set</div></div>
+        <div class="stat"><div class="v">8 fps</div><div class="k">slowest computer speed tested, still 40 / 40</div></div>
+        <div class="stat"><div class="v">0</div><div class="k">false reps when standing still or with shaky tracking</div></div>
+        <div class="stat sim"><div class="v">Front + side</div><div class="k">camera views tested, including feet out of frame. Shallow reps are counted and marked "not deep enough".</div></div>
+        <div class="stat" id="user-acc" hidden><div class="v" id="r-acc"></div><div class="k">rep-count accuracy with real people</div></div>
+        <div class="stat" id="user-people" hidden><div class="v" id="r-people"></div><div class="k">people tested</div></div>
       </div>
-      <p class="fill-note" id="fill-note">Screen only: the blanks fill in automatically from your Test Lab results when you open this page on the device you tested on, then print.</p>
       <span class="eyebrow" style="margin-top:1mm">Ethics &amp; impact</span>
       <div class="ethics">
-        <p><b>Bias:</b> we test people of different builds, lighting and clothing (including thobes and abayas) and fix the rules if any group is under-counted.</p>
+        <p><b>Bias:</b> the AI may work less well for some body types or loose clothing like thobes and abayas. Our Test Lab records accuracy by clothing and lighting so the rules can be tuned.</p>
         <p><b>Privacy:</b> the AI runs in your browser. Video is never uploaded or saved, and there are no accounts.</p>
         <p><b>Safety:</b> heat limits, rest and water reminders, and "stop if dizzy" warnings. Guidance, not medical advice.</p>
         <p><b>Jobs:</b> for times when no coach is around, not a replacement for trainers.</p>
@@ -245,11 +246,11 @@
   </section>
 
   <script type="module">
-    import { CONFIG } from './js/config.js?v=9';
-    import { heatIndexC } from './js/heat.js?v=9';
-    import { load } from './js/store.js?v=9';
-    import { PHOTO_POSES } from './js/photo-poses.js?v=9';
-    import { angleAt } from './js/exercises.js?v=9';
+    import { CONFIG } from './js/config.js?v=10';
+    import { heatIndexC } from './js/heat.js?v=10';
+    import { load } from './js/store.js?v=10';
+    import { PHOTO_POSES } from './js/photo-poses.js?v=10';
+    import { angleAt } from './js/exercises.js?v=10';
     import qrcode from './vendor/qrcode.mjs';
 
     const $ = (s) => document.querySelector(s);
@@ -286,17 +287,14 @@
       + [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28].filter(ok).map((i) => `<circle cx="${P(i).x}" cy="${P(i).y}" r="${i === side[1] ? w / 45 : w / 75}" fill="${i === side[1] ? '#22C55E' : '#F97316'}" stroke="#0A0F1E" stroke-width="${w / 300}"/>`).join('');
     $('#pose-cap').innerHTML = `Real output of our AI on this photo: <b>knee ${Math.round(knee)}° · full depth ✓</b> · 33/33 points`;
 
-    // results from the Test Lab (only real data; blanks otherwise)
+    // real user tests from the Test Lab, only if they exist on this device
     const tests = load('tests', []);
-    if (tests.length) {
-      const real = tests.reduce((s, t) => s + t.realReps, 0);
-      const err = tests.reduce((s, t) => s + Math.abs(t.aiReps - t.realReps), 0);
-      if (real > 0) $('#r-acc').textContent = Math.round(Math.max(0, 1 - err / real) * 100) + '%';
-      $('#r-people').textContent = new Set(tests.map((t) => String(t.tester).toUpperCase())).size;
-      $('#r-tests').textContent = tests.length;
-      const ease = tests.map((t) => t.ease).filter(Boolean);
-      if (ease.length) $('#r-ease').textContent = (ease.reduce((a, b) => a + b, 0) / ease.length).toFixed(1) + '/5';
-      $('#fill-note').textContent = `Screen only: filled in from ${tests.length} Test Lab result${tests.length > 1 ? 's' : ''} saved on this device.`;
+    const real = tests.reduce((t, x) => t + x.realReps, 0);
+    if (tests.length && real > 0) {
+      const err = tests.reduce((t, x) => t + Math.abs(x.aiReps - x.realReps), 0);
+      $('#r-acc').textContent = Math.round(Math.max(0, 1 - err / real) * 100) + '%';
+      $('#r-people').textContent = new Set(tests.map((x) => String(x.tester).toUpperCase())).size;
+      $('#user-acc').hidden = false; $('#user-people').hidden = false;
     }
   </script>
 </body>

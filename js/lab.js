@@ -1,8 +1,8 @@
-import { initPage, $, $$, esc, toast } from './ui.js?v=9';
-import { load, save, remove, getSettings, saveSettings, DEFAULT_SETTINGS } from './store.js?v=9';
-import { CONFIG } from './config.js?v=9';
-import { EXERCISES } from './exercises.js?v=9';
-import { growBars, pop, scrollToEl } from './motion.js?v=9';
+import { initPage, $, $$, esc, toast } from './ui.js?v=10';
+import { load, save, remove, getSettings, saveSettings, DEFAULT_SETTINGS } from './store.js?v=10';
+import { CONFIG } from './config.js?v=10';
+import { EXERCISES } from './exercises.js?v=10';
+import { growBars, pop, scrollToEl } from './motion.js?v=10';
 
 initPage();
 
