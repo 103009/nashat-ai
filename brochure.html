@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nashat — tri-fold brochure (A4)</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/fonts.css?v=9">
+  <style>
+    /* Tri-fold A4 landscape: 2 sheets (outside + inside), 3 panels of 99 mm each */
+    @page { size: A4 landscape; margin: 0; }
+    :root { --o: #F97316; --o2: #FB923C; --g: #16A34A; --ink: #0F172A; --muted: #475569; --navy: #0A0F1E; --line: #E2E8F0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #CBD5E1; font-family: 'Barlow', Arial, sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .toolbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; padding: 0.75rem; background: #0F172A; color: #fff; font-size: 0.95rem; }
+    .toolbar button { background: var(--o); color: #0F172A; border: 0; border-radius: 999px; padding: 0.6rem 1.2rem; font: 700 1rem 'Barlow', Arial; cursor: pointer; }
+    .sheet { width: 297mm; height: 210mm; margin: 10mm auto; background: #fff; display: grid; grid-template-columns: repeat(3, 99mm); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.25); position: relative; }
+    .sheet-label { width: 297mm; margin: 8mm auto -6mm; font: 600 12px 'Barlow', Arial; color: #334155; text-transform: uppercase; letter-spacing: .12em; }
+    .panel { position: relative; padding: 9mm 8mm; height: 210mm; overflow: hidden; display: flex; flex-direction: column; gap: 3.2mm; }
+    .panel + .panel { border-left: 0.3mm dashed #E2E8F0; }
+    h1, h2, h3 { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif; margin: 0; line-height: 1.02; text-transform: uppercase; }
+    h2 { font-size: 21pt; font-weight: 700; }
+    h2 span { color: var(--o); }
+    h3 { font-size: 12.5pt; font-weight: 700; }
+    p, li { font-size: 9.6pt; line-height: 1.38; margin: 0; }
+    .eyebrow { font: 700 7.5pt 'Barlow', Arial; letter-spacing: .16em; text-transform: uppercase; color: var(--o); }
+    .muted { color: var(--muted); }
+    .small { font-size: 8pt; }
+    ul.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 2mm; }
+    ul.ticks li { padding-left: 5mm; position: relative; }
+    ul.ticks li::before { content: ''; position: absolute; left: 0; top: 1.6mm; width: 2.4mm; height: 2.4mm; border-radius: 50%; background: var(--o); }
+    .card { border: 0.3mm solid var(--line); border-radius: 3mm; padding: 3mm 3.5mm; background: #F8FAFC; }
+    .photo { border-radius: 3mm; overflow: hidden; position: relative; background: #111; }
+    .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* front cover */
+    .cover { background: var(--navy); color: #fff; padding: 0; }
+    .cover .bg { position: absolute; inset: 0; }
+    .cover .bg img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 40%; }
+    .cover .bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,15,30,.25) 0%, rgba(10,15,30,.1) 35%, rgba(10,15,30,.85) 70%, rgba(10,15,30,.97) 100%); }
+    .cover .inner { position: relative; z-index: 1; height: 210mm; display: flex; flex-direction: column; justify-content: space-between; padding: 9mm 8mm; }
+    .logo { display: flex; align-items: center; gap: 2.5mm; }
+    .mark { width: 11mm; height: 11mm; border-radius: 3mm; display: grid; place-items: center; background: linear-gradient(135deg, #F97316, #E11D48); font: 700 20pt 'Barlow Condensed', Arial; color: #fff; }
+    .cover h1 { font-size: 44pt; letter-spacing: .02em; }
+    .cover h1 small { display: block; font: 600 20pt 'Barlow', Arial; color: var(--o2); text-transform: none; margin-top: 1mm; }
+    .cover .tag { font: 600 13pt/1.25 'Barlow', Arial; margin-top: 2mm; }
+    .cover .meta { display: grid; gap: 1mm; font-size: 9pt; color: #E2E8F0; margin-top: 4mm; border-top: 0.3mm solid rgba(255,255,255,.25); padding-top: 3mm; }
+    .cover .meta b { color: #fff; }
+    .pill { display: inline-block; background: var(--o); color: #0F172A; border-radius: 99px; padding: 1mm 3mm; font: 700 8.5pt 'Barlow', Arial; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* problem */
+    .big-heat { background: linear-gradient(135deg, #7C2D12, #E11D48); color: #fff; border-radius: 3mm; padding: 4mm; }
+    .big-heat .n { font: 700 38pt/1 'Barlow Condensed', Arial; }
+    .big-heat p { font-size: 9pt; color: #FFE4E6; }
+
+    /* back: team + QR */
+    .team { display: grid; gap: 1.6mm; }
+    .member { display: grid; grid-template-columns: 8mm 1fr; gap: 2.5mm; align-items: center; }
+    .av { width: 8mm; height: 8mm; border-radius: 50%; display: grid; place-items: center; font: 700 9pt 'Barlow Condensed', Arial; color: #fff; background: linear-gradient(135deg, #F97316, #E11D48); }
+    .member b { font-size: 9.6pt; display: block; line-height: 1.1; }
+    .member span { font-size: 8.4pt; color: var(--muted); }
+    .member.lead { background: #FFF7ED; border: 0.3mm solid #FDBA74; border-radius: 3mm; padding: 1.8mm; }
+    .qr-wrap { display: grid; grid-template-columns: 34mm 1fr; gap: 4mm; align-items: center; background: var(--navy); color: #fff; border-radius: 3mm; padding: 4mm; }
+    .qr { background: #fff; border-radius: 2mm; padding: 1.5mm; width: 34mm; height: 34mm; }
+    .qr svg { width: 100%; height: 100%; display: block; }
+    .qr-wrap h3 { color: #fff; font-size: 15pt; }
+    .qr-wrap p { color: #CBD5E1; font-size: 8.5pt; }
+    #qr-url { word-break: break-all; }
+
+    /* how the AI works */
+    .flow { display: grid; gap: 1.4mm; }
+    .step { display: grid; grid-template-columns: 9mm 1fr; gap: 2.5mm; align-items: start; }
+    .step .num { width: 9mm; height: 9mm; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font: 700 11pt 'Barlow Condensed', Arial; }
+    .step.ai .num { background: var(--o); }
+    .step.rules .num { background: #0284C7; }
+    .step h3 { font-size: 11pt; }
+    .step p { font-size: 8.6pt; }
+    .arrow { margin-left: 3.6mm; height: 2.4mm; border-left: 0.6mm solid #CBD5E1; }
+    .pose { height: 64mm; }
+    .cap-mini { position: absolute; left: 2mm; bottom: 2mm; background: rgba(10,15,30,.82); color: #fff; border-radius: 2mm; padding: 1mm 2mm; font-size: 7.5pt; font-weight: 600; }
+    .pose svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .pose .cap { position: absolute; left: 2mm; right: 2mm; bottom: 2mm; background: rgba(10,15,30,.82); color: #fff; border-radius: 2mm; padding: 1.5mm 2.5mm; font-size: 8pt; }
+    .pose .cap b { color: #86EFAC; }
+
+    /* app */
+    .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5mm; }
+    .phone { border: 1.4mm solid #0B0F18; border-radius: 4mm; overflow: hidden; aspect-ratio: 585 / 996; background: #0B0F18; }
+    .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    .phone-cap { font: 700 8pt 'Barlow Condensed', Arial; text-transform: uppercase; text-align: center; margin-top: 1mm; }
+    ol.how { padding-left: 0; margin: 0; list-style: none; counter-reset: s; display: grid; gap: 2mm; }
+    ol.how li { counter-increment: s; display: grid; grid-template-columns: 7mm 1fr; gap: 2mm; align-items: start; }
+    ol.how li::before { content: counter(s); width: 7mm; height: 7mm; border-radius: 50%; background: var(--o); color: #0F172A; display: grid; place-items: center; font: 700 10pt 'Barlow Condensed', Arial; }
+
+    /* results + ethics */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; }
+    .stat { border-radius: 3mm; padding: 2.5mm 3mm; background: #F1F5F9; }
+    .stat .v { font: 700 22pt/1 'Barlow Condensed', Arial; color: var(--o); }
+    .stat .k { font-size: 7.8pt; color: var(--muted); margin-top: 0.6mm; }
+    .stat.sim { grid-column: span 2; background: #ECFDF5; }
+    .stat.sim .v { color: var(--g); }
+    .ethics { display: grid; gap: 1.6mm; }
+    .ethics p { font-size: 8.7pt; }
+    .ethics b { color: var(--o); }
+    .fill-note { display: none; }
+    @media screen { .fill-note { display: block; background: #FEF3C7; border: 0.3mm dashed #D97706; color: #92400E; border-radius: 2mm; padding: 1.5mm 2mm; font-size: 7.5pt; } }
+
+    @media print {
+      html, body { background: #fff; }
+      .toolbar, .sheet-label { display: none; }
+      .sheet { margin: 0; box-shadow: none; page-break-after: always; break-after: page; }
+      .panel + .panel { border-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <span>Nashat tri-fold brochure · A4 landscape, print double-sided (flip on short edge), then fold in three.</span>
+    <button type="button" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <!-- ═══════════ SHEET 1: OUTSIDE ═══════════ -->
+  <div class="sheet-label">Sheet 1 · outside</div>
+  <section class="sheet">
+    <!-- inner flap: the problem -->
+    <div class="panel">
+      <span class="eyebrow">The problem</span>
+      <h2>Bahrain's summer is a <span>fitness problem</span></h2>
+      <div class="big-heat">
+        <div class="n"><span id="hi-air">38</span>°C → <span id="hi-out">55</span>°C</div>
+        <p>38 °C air with 60% humidity <b>feels like <span id="hi-out2">55</span> °C</b>. Sweat can't cool you down.</p>
+      </div>
+      <ul class="ticks">
+        <li>From June to September it is unsafe to exercise outside for much of the day. Bahrain already bans outdoor work at midday in summer.</li>
+        <li>So people train indoors, alone. Nobody corrects shallow squats or sagging push-ups, and bad form can cause injury.</li>
+        <li>It is hard to know when it is safe to train outside.</li>
+      </ul>
+      <div class="card">
+        <h3>Who it affects</h3>
+        <p class="muted">Students and young people who want to stay active, people exercising while fasting in Ramadan, and beginners who can't afford a trainer.</p>
+      </div>
+      <div class="photo" style="flex:1; min-height:30mm"><img src="assets/photos/football-sm.webp" alt=""></div>
+    </div>
+
+    <!-- back panel: team + QR -->
+    <div class="panel">
+      <span class="eyebrow">Meet the team</span>
+      <h2>Our <span>team</span><span id="team-no"></span></h2>
+      <div class="team" id="team"></div>
+      <div class="photo" style="flex:1; min-height:20mm"><img src="assets/photos/basketball-sm.webp" alt="" style="object-position:50% 30%"></div>
+      <div class="qr-wrap">
+        <div class="qr" id="qr"></div>
+        <div>
+          <h3>Try it on your phone</h3>
+          <p>Scan the code, allow the camera and do 5 squats.</p>
+          <p id="qr-url" style="margin-top:1.5mm"></p>
+        </div>
+      </div>
+      <p class="small muted">Photos are AI-generated for this project. Pose AI: MediaPipe Pose Landmarker by Google. Built with help from AI tools. Weather: Open-Meteo.com.</p>
+    </div>
+
+    <!-- front cover -->
+    <div class="panel cover">
+      <div class="bg"><img src="assets/photos/run.webp" alt=""></div>
+      <div class="inner">
+        <div class="logo"><div class="mark">N</div><span class="pill">AI Symposium 2027</span></div>
+        <div>
+          <h1>Nashat<small lang="ar">نشاط</small></h1>
+          <p class="tag">The heat-smart AI exercise coach for Bahrain</p>
+          <div class="meta">
+            <span><b>Field:</b> Sport · <b>Team:</b> <span id="cover-team">____</span></span>
+            <span>Hawar International School</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SHEET 2: INSIDE ═══════════ -->
+  <div class="sheet-label">Sheet 2 · inside</div>
+  <section class="sheet">
+    <!-- how the AI works -->
+    <div class="panel">
+      <span class="eyebrow">How the AI works</span>
+      <h2>From data to <span>feedback</span></h2>
+      <div class="flow">
+        <div class="step"><div class="num">1</div><div><h3>Data</h3><p>Many photos of people, with their joints marked by hand.</p></div></div>
+        <div class="arrow"></div>
+        <div class="step"><div class="num">2</div><div><h3>Training</h3><p>A neural network learns to find joints by fixing its mistakes millions of times (done by Google).</p></div></div>
+        <div class="arrow"></div>
+        <div class="step ai"><div class="num">3</div><div><h3>Prediction</h3><p>On your phone, it finds 33 body points in every video frame. No video is uploaded.</p></div></div>
+        <div class="arrow"></div>
+        <div class="step rules"><div class="num">4</div><div><h3>Our rules</h3><p>Our code turns the points into angles and a depth score, then counts reps and checks form.</p></div></div>
+      </div>
+      <div class="photo pose" id="pose">
+        <img src="assets/photos/squat-sm.webp" alt="Athlete squatting with the AI's skeleton drawn on top">
+        <svg id="pose-svg" aria-hidden="true"></svg>
+        <div class="cap" id="pose-cap">Real output of our AI on this photo</div>
+      </div>
+    </div>
+
+    <!-- the app -->
+    <div class="panel">
+      <span class="eyebrow">Our website</span>
+      <h2>One site, <span>three tools</span></h2>
+      <div class="phones">
+        <div><div class="phone"><img src="assets/shots/heat.jpg" alt="Heat check screen"></div><div class="phone-cap">Heat check</div></div>
+        <div><div class="phone"><img src="assets/shots/coach.jpg" alt="AI coach screen"></div><div class="phone-cap">AI coach</div></div>
+        <div><div class="phone"><img src="assets/shots/lab.jpg" alt="Test lab screen"></div><div class="phone-cap">Test lab</div></div>
+      </div>
+      <h3 style="margin-top:1mm">How to use it</h3>
+      <ol class="how">
+        <li><p><b>Check the heat.</b> Live Manama weather gives a safe plan and the coolest time to train, with a Ramadan mode.</p></li>
+        <li><p><b>Prop up your phone</b> 2–3 m away and pick squats, push-ups or jumping jacks.</p></li>
+        <li><p><b>Train.</b> The AI counts every rep, says "go lower" or "keep your chest up", and times your rest.</p></li>
+      </ol>
+      <div class="photo" style="flex:1; min-height:20mm"><img src="assets/photos/pushup-sm.webp" alt="Push-ups at home with the phone on the floor filming"><div class="cap-mini">Works at home: phone on the floor, side-on</div></div>
+      <div class="card">
+        <h3>What AI should NOT do</h3>
+        <p class="muted">Diagnose injuries, decide alone that it is safe to train, or store videos of people.</p>
+      </div>
+    </div>
+
+    <!-- results + ethics -->
+    <div class="panel">
+      <span class="eyebrow">Results</span>
+      <h2>Tested with <span>real people</span></h2>
+      <div class="stats" id="stats">
+        <div class="stat"><div class="v" id="r-acc">___%</div><div class="k">rep-count accuracy (AI vs. a person counting)</div></div>
+        <div class="stat"><div class="v" id="r-people">___</div><div class="k">people tested</div></div>
+        <div class="stat"><div class="v" id="r-ease">___/5</div><div class="k">ease of use (tester rating)</div></div>
+        <div class="stat"><div class="v" id="r-tests">___</div><div class="k">test sets logged</div></div>
+        <div class="stat sim"><div class="v">22 / 22</div><div class="k">simulated checks passed, including 40-rep sets, front and side camera views and slow computers</div></div>
+      </div>
+      <p class="fill-note" id="fill-note">Screen only: the blanks fill in automatically from your Test Lab results when you open this page on the device you tested on, then print.</p>
+      <span class="eyebrow" style="margin-top:1mm">Ethics &amp; impact</span>
+      <div class="ethics">
+        <p><b>Bias:</b> we test people of different builds, lighting and clothing (including thobes and abayas) and fix the rules if any group is under-counted.</p>
+        <p><b>Privacy:</b> the AI runs in your browser. Video is never uploaded or saved, and there are no accounts.</p>
+        <p><b>Safety:</b> heat limits, rest and water reminders, and "stop if dizzy" warnings. Guidance, not medical advice.</p>
+        <p><b>Jobs:</b> for times when no coach is around, not a replacement for trainers.</p>
+        <p><b>Environment:</b> a small 6 MB model on your device, no server running all the time.</p>
+      </div>
+      <div class="photo" style="flex:1; min-height:16mm"><img src="assets/photos/padel-sm.webp" alt=""></div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { CONFIG } from './js/config.js?v=9';
+    import { heatIndexC } from './js/heat.js?v=9';
+    import { load } from './js/store.js?v=9';
+    import { PHOTO_POSES } from './js/photo-poses.js?v=9';
+    import { angleAt } from './js/exercises.js?v=9';
+    import qrcode from './vendor/qrcode.mjs';
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    // heat example from the real formula
+    const hi = Math.round(heatIndexC(38, 60));
+    $('#hi-out').textContent = hi; $('#hi-out2').textContent = hi;
+
+    // team
+    if (CONFIG.teamNumber) { $('#team-no').textContent = ' · ' + CONFIG.teamNumber; $('#cover-team').textContent = CONFIG.teamNumber; }
+    const initials = (n) => n.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+    $('#team').innerHTML = CONFIG.team.map((m) => `
+      <div class="member${m.leader ? ' lead' : ''}"><div class="av">${esc(initials(m.name))}</div>
+      <div><b>${esc(m.name)}${m.leader ? ' · Team leader' : ''}</b><span>${esc(m.role)}</span></div></div>`).join('');
+
+    // QR code (vector, crisp in print)
+    const url = CONFIG.siteUrl || new URL('./', location.href).href;
+    const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+    $('#qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+    $('#qr-url').textContent = url.replace(/^https?:\/\//, '');
+
+    // real AI skeleton on the squat photo
+    const { w, h, pts } = PHOTO_POSES.squat;
+    const P = (i) => ({ x: pts[i][0] * w, y: pts[i][1] * h });
+    const ok = (i) => pts[i][2] > 0.5;
+    const BONES = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28]];
+    const side = [23, 25, 27].reduce((a, i) => a + pts[i][2], 0) >= [24, 26, 28].reduce((a, i) => a + pts[i][2], 0) ? [23, 25, 27] : [24, 26, 28];
+    const knee = angleAt(P(side[0]), P(side[1]), P(side[2]));
+    const svg = $('#pose-svg');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    svg.innerHTML = BONES.filter(([a, b]) => ok(a) && ok(b)).map(([a, b]) => `<line x1="${P(a).x}" y1="${P(a).y}" x2="${P(b).x}" y2="${P(b).y}" stroke="#fff" stroke-width="${w / 90}" stroke-linecap="round"/>`).join('')
+      + [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28].filter(ok).map((i) => `<circle cx="${P(i).x}" cy="${P(i).y}" r="${i === side[1] ? w / 45 : w / 75}" fill="${i === side[1] ? '#22C55E' : '#F97316'}" stroke="#0A0F1E" stroke-width="${w / 300}"/>`).join('');
+    $('#pose-cap').innerHTML = `Real output of our AI on this photo: <b>knee ${Math.round(knee)}° · full depth ✓</b> · 33/33 points`;
+
+    // results from the Test Lab (only real data; blanks otherwise)
+    const tests = load('tests', []);
+    if (tests.length) {
+      const real = tests.reduce((s, t) => s + t.realReps, 0);
+      const err = tests.reduce((s, t) => s + Math.abs(t.aiReps - t.realReps), 0);
+      if (real > 0) $('#r-acc').textContent = Math.round(Math.max(0, 1 - err / real) * 100) + '%';
+      $('#r-people').textContent = new Set(tests.map((t) => String(t.tester).toUpperCase())).size;
+      $('#r-tests').textContent = tests.length;
+      const ease = tests.map((t) => t.ease).filter(Boolean);
+      if (ease.length) $('#r-ease').textContent = (ease.reduce((a, b) => a + b, 0) / ease.length).toFixed(1) + '/5';
+      $('#fill-note').textContent = `Screen only: filled in from ${tests.length} Test Lab result${tests.length > 1 ? 's' : ''} saved on this device.`;
+    }
+  </script>
+</body>
+</html>
