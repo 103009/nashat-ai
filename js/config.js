@@ -31,7 +31,17 @@ export const CONFIG = {
   // Paste your team's OWN ethics & impact statement here (~200 words).
   // The guide does not allow AI-written text for this, so write it yourselves.
   // Separate paragraphs with a blank line.
-  ethicsStatement: ``,
+  ethicsStatement: `Nashat uses AI to coach exercise, so we thought carefully about its risks.
+
+Bias: Pose-detection models can be less accurate for some body types, skin tones, or loose clothing such as a thobe or abaya. We test Nashat with people of different builds, lighting and clothing, record accuracy for each in our Test Lab, and adjust the counting rules if any group is under-counted.
+
+Privacy: A camera pointed at someone's body is sensitive. Nashat's AI runs entirely in the browser, so video is never uploaded, recorded or stored. There are no accounts, and testers are logged with codes, not names.
+
+Safety: Wrong advice could cause injury or heat illness. Nashat limits workout time and adds rest using the heat index, warns users to train indoors in dangerous heat, and reminds them to stop if they feel dizzy. It gives general guidance, not medical advice.
+
+Jobs: Nashat is designed for times when no coach is available, not to replace personal trainers, who could also use it to check clients' form at home.
+
+Environment: Training AI models uses energy, but Nashat runs a small 6 MB model on the user's own device instead of a server that runs all the time.`,
 
   // Location used for live weather (Manama, Bahrain).
   location: { name: 'Manama, Bahrain', latitude: 26.2235, longitude: 50.5876, timezone: 'Asia/Bahrain' },
